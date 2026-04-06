@@ -623,16 +623,10 @@ async function loadFromSheet(){
 }
 
 async function saveToSheet(){
+  // Render immediately so user sees the change right away
+  renderAll();
+  // Then save to Google Sheets in the background
   try {
-    // Always pull latest data first to avoid overwriting changes from other devices
-    const res=await fetch(SCRIPT_URL+'?action=read');
-    const latest=await res.json();
-    if(!latest.error){
-      // Merge: keep latest from sheet for all collections except the one we just changed
-      // We trust our local db fully since we just modified it intentionally
-      // But sync the users list from server to avoid losing new users added elsewhere
-      if(latest.users) db.users=latest.users;
-    }
     await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'write',payload:db})});
   } catch(e){ console.error('Save error',e); }
 }
@@ -736,12 +730,12 @@ function renderStats(){
   const box=filterByPrefix(db.box,prefix);
   const donations=filterByPrefix(db.donations,prefix);
   const feeTotal  = payments.reduce((a,p)=>a+Number(p.amount||0),0);
-  const saamTotal = saaman.reduce((a,s)=>a+Number(s.amount||0),0);
+  const saamTotal = saaman.filter(s=>s.paid==='yes').reduce((a,s)=>a+Number(s.amount||0),0);
   const saamDue   = saaman.filter(s=>s.paid==='no').reduce((a,s)=>a+Number(s.amount||0),0);
   const boxTotal  = box.reduce((a,b)=>a+Number(b.amount||0),0);
   const donTotal  = donations.reduce((a,d)=>a+Number(d.amount||0),0);
   const overdue   = db.members.filter(m=>memberStatus(m)==='late').length;
-  const grand     = feeTotal+saamTotal+boxTotal+donTotal;
+  const grand     = feeTotal+saamTotal+boxTotal+donTotal; // saamTotal already only counts paid
   document.getElementById('stats').innerHTML=`
     <div class="stat"><div class="label">Members</div><div class="value">${db.members.length}</div></div>
     <div class="stat"><div class="label">Fees collected</div><div class="value" style="color:#27ae60">Rs ${feeTotal.toLocaleString()}</div></div>
@@ -990,7 +984,17 @@ async function addSaaman(){
   document.getElementById('s-person-type').value='member';
   toggleSaamanPerson();
 }
-async function markSaamanPaid(id){if(!can('write'))return;const s=db.saaman.find(x=>String(x.id)===String(id));if(s)s.paid='yes';await saveToSheet();renderAll();}
+async function markSaamanPaid(id){
+  if(!can('write'))return;
+  try {
+    const res=await fetch(SCRIPT_URL+'?action=read');
+    const latest=await res.json();
+    if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}
+  } catch(e){ console.error(e); }
+  const s=db.saaman.find(x=>String(x.id)===String(id));
+  if(s){ s.paid='yes'; await saveToSheet(); renderAll(); }
+  else { alert('Record not found. Please refresh and try again.'); }
+}
 
 function showReceipt(id){
   const s=db.saaman.find(x=>String(x.id)===String(id));
