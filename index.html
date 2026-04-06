@@ -171,12 +171,12 @@
         <h3>Add Member</h3>
         <div class="form-row">
           <div class="form-group"><label>Full name</label><input id="m-name" placeholder="e.g. Boodhun Iqbal" /></div>
-          <div class="form-group"><label>Annual fee (Rs)</label><input id="m-fee" type="number" value="1200" /></div>
+          <div class="form-group"><label>Annual fee (Rs) <span style="color:#aaa;font-weight:400">(optional)</span></label><input id="m-fee" type="number" placeholder="1200" /></div>
         </div>
         <div class="form-row three">
-          <div class="form-group"><label>Date joined</label><input id="m-date" type="date" /></div>
-          <div class="form-group"><label>Paid up to (month)</label><input id="m-paid" type="month" /></div>
-          <div class="form-group"><label>Entry fee paid (Rs)</label><input id="m-entry" type="number" placeholder="0" /></div>
+          <div class="form-group"><label>Date joined <span style="color:#aaa;font-weight:400">(optional)</span></label><input id="m-date" type="date" /></div>
+          <div class="form-group"><label>Paid up to <span style="color:#e74c3c">*</span></label><input id="m-paid" type="month" /></div>
+          <div class="form-group"><label>Entry fee paid (Rs) <span style="color:#aaa;font-weight:400">(optional)</span></label><input id="m-entry" type="number" placeholder="0" /></div>
         </div>
         <div class="form-row"><div class="form-group"><label>Notes</label><input id="m-notes" placeholder="Optional" /></div></div>
         <div class="flex-end"><button class="btn btn-primary" id="add-member-btn" onclick="addMember()">Add Member</button></div>
@@ -581,6 +581,15 @@ async function loadFromSheet(){
 
 async function saveToSheet(){
   try {
+    // Always pull latest data first to avoid overwriting changes from other devices
+    const res=await fetch(SCRIPT_URL+'?action=read');
+    const latest=await res.json();
+    if(!latest.error){
+      // Merge: keep latest from sheet for all collections except the one we just changed
+      // We trust our local db fully since we just modified it intentionally
+      // But sync the users list from server to avoid losing new users added elsewhere
+      if(latest.users) db.users=latest.users;
+    }
     await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'write',payload:db})});
   } catch(e){ console.error('Save error',e); }
 }
@@ -617,9 +626,15 @@ function memberStatus(m){
   const now=new Date();const y=now.getFullYear();const mo=now.getMonth()+1;
   const cur=y+'-'+String(mo).padStart(2,'0');
   if(!m.paidTo) return 'late';
-  if(String(m.paidTo)>=cur) return 'ok';
-  const[py,pm]=String(m.paidTo).split('-').map(Number);
-  return ((y-py)*12+(mo-pm))<=2?'warn':'late';
+  // Strip time if full date string e.g. 2026-03-31T20:00:00.000Z → 2026-03
+  const raw=String(m.paidTo).split('T')[0];
+  const parts=raw.split('-');
+  const paidStr=parts[0]+'-'+parts[1];
+  if(paidStr>=cur) return 'ok';
+  const py=parseInt(parts[0]); const pm=parseInt(parts[1]);
+  const monthsBehind=(y-py)*12+(mo-pm);
+  // Due soon: 1-2 months behind, Non member: 3+ months behind
+  return monthsBehind<=2?'warn':'late';
 }
 function statusBadge(s){
   if(s==='ok')   return '<span class="badge badge-ok">Member</span>';
@@ -720,16 +735,38 @@ async function addMember(){
   if(!can('write')) return alert('You have read-only access');
   const name=document.getElementById('m-name').value.trim();
   if(!name) return alert('Please enter a name');
+  const paidTo=document.getElementById('m-paid').value;
+  if(!paidTo) return alert('Paid up to is required');
   const btn=document.getElementById('add-member-btn');
   btn.disabled=true; btn.textContent='Saving...';
-  db.members.push({id:String(Date.now()),name,fee:document.getElementById('m-fee').value||'1200',joinDate:document.getElementById('m-date').value,paidTo:document.getElementById('m-paid').value,entryFee:document.getElementById('m-entry').value||'0',notes:document.getElementById('m-notes').value});
+  // Pull fresh data first
+  try {
+    const res=await fetch(SCRIPT_URL+'?action=read');
+    const latest=await res.json();
+    if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}
+  } catch(e){ console.error(e); }
+  const feeVal=document.getElementById('m-fee').value;
+  db.members.push({id:String(Date.now()),name,fee:feeVal!==''?feeVal:'0',joinDate:document.getElementById('m-date').value||'',paidTo,entryFee:document.getElementById('m-entry').value||'0',notes:document.getElementById('m-notes').value});
   await saveToSheet(); renderAll();
-  ['m-name','m-entry','m-notes'].forEach(id=>document.getElementById(id).value='');
+  ['m-name','m-entry','m-notes','m-date'].forEach(id=>document.getElementById(id).value='');
   btn.disabled=false; btn.textContent='Add Member';
 }
 async function deleteMember(id){
   if(!can('write')) return;
   if(!confirm('Remove this member?')) return;
+  // Pull fresh data first to avoid overwriting changes from other devices
+  try {
+    const res=await fetch(SCRIPT_URL+'?action=read');
+    const latest=await res.json();
+    if(!latest.error){
+      db.members=latest.members||db.members;
+      db.payments=latest.payments||db.payments;
+      db.saaman=latest.saaman||db.saaman;
+      db.box=latest.box||db.box;
+      db.donations=latest.donations||db.donations;
+      db.users=latest.users||db.users;
+    }
+  } catch(e){ console.error(e); }
   db.members=db.members.filter(m=>String(m.id)!==String(id));
   await saveToSheet(); renderAll();
 }
@@ -799,7 +836,7 @@ async function addPayment(){
   await saveToSheet(); renderAll();
   ['p-amount','p-fine','p-notes'].forEach(id=>document.getElementById(id).value='');
 }
-async function deletePayment(id){if(!can('write'))return;db.payments=db.payments.filter(p=>String(p.id)!==String(id));await saveToSheet();renderAll();}
+async function deletePayment(id){if(!can('write'))return;if(!confirm('Delete this payment?'))return;try{const res=await fetch(SCRIPT_URL+'?action=read');const latest=await res.json();if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}}catch(e){console.error(e);}db.payments=db.payments.filter(p=>String(p.id)!==String(id));await saveToSheet();renderAll();}
 
 function renderSaaman(){
   const tbody=document.getElementById('saaman-tbody');
@@ -884,7 +921,7 @@ async function downloadReceipt(){
     console.error(e);
   }
 }
-async function deleteSaaman(id){if(!can('write'))return;db.saaman=db.saaman.filter(s=>String(s.id)!==String(id));await saveToSheet();renderAll();}
+async function deleteSaaman(id){if(!can('write'))return;if(!confirm('Delete this rental?'))return;try{const res=await fetch(SCRIPT_URL+'?action=read');const latest=await res.json();if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}}catch(e){console.error(e);}db.saaman=db.saaman.filter(s=>String(s.id)!==String(id));await saveToSheet();renderAll();}
 
 function renderBox(){
   const tbody=document.getElementById('box-tbody');
@@ -904,7 +941,7 @@ async function addBox(){
   await saveToSheet(); renderAll();
   ['b-amount','b-by','b-notes'].forEach(id=>document.getElementById(id).value='');
 }
-async function deleteBox(id){if(!can('write'))return;db.box=db.box.filter(b=>String(b.id)!==String(id));await saveToSheet();renderAll();}
+async function deleteBox(id){if(!can('write'))return;if(!confirm('Delete this entry?'))return;try{const res=await fetch(SCRIPT_URL+'?action=read');const latest=await res.json();if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}}catch(e){console.error(e);}db.box=db.box.filter(b=>String(b.id)!==String(id));await saveToSheet();renderAll();}
 
 function renderDonations(){
   const tbody=document.getElementById('donations-tbody');
@@ -925,7 +962,7 @@ async function addDonation(){
   await saveToSheet(); renderAll();
   ['d-donor','d-amount','d-notes'].forEach(id=>document.getElementById(id).value='');
 }
-async function deleteDonation(id){if(!can('write'))return;db.donations=db.donations.filter(d=>String(d.id)!==String(id));await saveToSheet();renderAll();}
+async function deleteDonation(id){if(!can('write'))return;if(!confirm('Delete this donation?'))return;try{const res=await fetch(SCRIPT_URL+'?action=read');const latest=await res.json();if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}}catch(e){console.error(e);}db.donations=db.donations.filter(d=>String(d.id)!==String(id));await saveToSheet();renderAll();}
 
 // ── USERS ─────────────────────────────────────────────────────
 function renderUsers(){
