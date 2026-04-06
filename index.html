@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Masjid Ledger</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f5f5f5; color: #222; font-size: 14px; }
+
+  /* ── LOGIN ── */
+  #login-screen { display:flex; align-items:center; justify-content:center; min-height:100vh; background:#1a1a1a; }
+  .login-box { background:#fff; border-radius:12px; padding:36px 32px; width:100%; max-width:360px; box-shadow:0 4px 24px rgba(0,0,0,0.3); }
+  .login-box h1 { font-size:20px; font-weight:700; margin-bottom:4px; color:#1a1a1a; }
+  .login-box p { font-size:12px; color:#888; margin-bottom:24px; }
+  .login-box .form-group { margin-bottom:14px; }
+  .login-box label { font-size:12px; color:#555; font-weight:500; display:block; margin-bottom:4px; }
+  .login-box input { width:100%; padding:9px 12px; font-size:14px; border:1px solid #ccc; border-radius:6px; }
+  .login-box input:focus { outline:none; border-color:#1a1a1a; }
+  .login-box .btn-login { width:100%; padding:11px; background:#1a1a1a; color:#fff; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; margin-top:6px; }
+  .login-box .btn-login:hover { background:#333; }
+  .login-err { color:#c0392b; font-size:12px; margin-top:8px; text-align:center; display:none; }
+
+  /* ── APP ── */
+  #app-screen { display:none; }
+  .topbar { background:#1a1a1a; color:#fff; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  .topbar h1 { font-size:18px; font-weight:600; }
+  .topbar p { font-size:12px; color:#aaa; margin-top:2px; }
+  .topbar-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .user-badge { font-size:11px; background:#333; color:#fff; padding:4px 10px; border-radius:20px; }
+  .conn { font-size:11px; padding:4px 12px; border-radius:20px; font-weight:600; }
+  .conn-ok   { background:#d4edda; color:#155724; }
+  .conn-err  { background:#f8d7da; color:#721c24; }
+  .conn-wait { background:#fff3cd; color:#856404; }
+  .btn { padding:8px 16px; font-size:13px; border-radius:6px; border:1px solid #ccc; cursor:pointer; background:#fff; color:#222; }
+  .btn-primary { background:#1a1a1a; color:#fff; border-color:#1a1a1a; }
+  .btn-sm { padding:4px 10px; font-size:12px; }
+  .btn-danger { color:#c0392b; border-color:#e74c3c; background:#fff; }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .readonly-badge { background:#fff3cd; color:#856404; font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .container { max-width:1100px; margin:0 auto; padding:20px 16px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
+  .stat { background:#fff; border-radius:8px; padding:14px; border:1px solid #e0e0e0; }
+  .stat .label { font-size:11px; color:#777; margin-bottom:4px; }
+  .stat .value { font-size:20px; font-weight:600; }
+  .tabs { display:flex; gap:2px; border-bottom:2px solid #ddd; margin-bottom:20px; flex-wrap:wrap; }
+  .tab { padding:9px 16px; font-size:13px; cursor:pointer; border:none; background:none; color:#777; border-bottom:3px solid transparent; margin-bottom:-2px; }
+  .tab.active { color:#1a1a1a; border-bottom:3px solid #1a1a1a; font-weight:600; }
+  .card { background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:18px; margin-bottom:16px; }
+  .card h3 { font-size:14px; font-weight:600; margin-bottom:14px; color:#333; }
+  .card p.sub { font-size:12px; color:#888; margin-bottom:12px; margin-top:-8px; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .form-row.three { grid-template-columns:1fr 1fr 1fr; }
+  .form-group { display:flex; flex-direction:column; gap:4px; }
+  .form-group label { font-size:12px; color:#555; font-weight:500; }
+  input, select { width:100%; padding:8px 10px; font-size:13px; border:1px solid #ccc; border-radius:6px; background:#fff; color:#222; }
+  input:focus, select:focus { outline:none; border-color:#1a1a1a; }
+  .flex-end { display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
+  .search-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
+  .search-row input { max-width:220px; }
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; padding:9px 10px; font-size:11px; font-weight:600; color:#666; border-bottom:1px solid #e0e0e0; white-space:nowrap; background:#fafafa; }
+  td { padding:10px 10px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#fafafa; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .badge-ok     { background:#d4edda; color:#155724; }
+  .badge-warn   { background:#fff3cd; color:#856404; }
+  .badge-late   { background:#f8d7da; color:#721c24; }
+  .badge-paid   { background:#d4edda; color:#155724; }
+  .badge-unpaid { background:#f8d7da; color:#721c24; }
+  .badge-admin  { background:#d1ecf1; color:#0c5460; }
+  .badge-rw     { background:#d4edda; color:#155724; }
+  .badge-ro     { background:#e2e3e5; color:#383d41; }
+  .empty { text-align:center; padding:2rem; color:#aaa; font-size:13px; }
+  .pos { color:#27ae60; font-weight:500; }
+  .neg { color:#e74c3c; font-weight:500; }
+  .modules-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-top:6px; }
+  .module-check { display:flex; align-items:center; gap:6px; font-size:13px; }
+  .module-check input[type=checkbox] { width:auto; }
+  @media(max-width:600px) {
+    .form-row,.form-row.three { grid-template-columns:1fr; }
+    .stats { grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Masjid Ledger</h1>
+    <p>Sign in to continue</p>
+    <div class="form-group"><label>Username</label><input id="login-user" placeholder="Username" autocomplete="username" /></div>
+    <div class="form-group"><label>Password</label><input id="login-pass" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+    <button class="btn-login" onclick="doLogin()">Sign in</button>
+    <div class="login-err" id="login-err">Invalid username or password</div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="app-screen">
+  <div class="topbar">
+    <div>
+      <h1>Masjid Ledger</h1>
+      <p>Fees &middot; Entry &middot; Saaman &middot; Masjid Box &middot; Donations</p>
+    </div>
+    <div class="topbar-right">
+      <span class="user-badge" id="user-badge"></span>
+      <span class="conn conn-wait" id="conn-status">Connecting...</span>
+      <button class="btn" onclick="loadFromSheet()" id="refresh-btn">&#8635; Refresh</button>
+      <button class="btn btn-primary" onclick="exportCSV()">Export CSV</button>
+      <button class="btn btn-danger" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="stats" id="stats"></div>
+
+    <div class="tabs" id="tabs-bar">
+      <button class="tab active" data-tab="members" onclick="switchTab('members',this)">Members</button>
+      <button class="tab" data-tab="payments" onclick="switchTab('payments',this)">Payments</button>
+      <button class="tab" data-tab="saaman" onclick="switchTab('saaman',this)">Saaman</button>
+      <button class="tab" data-tab="box" onclick="switchTab('box',this)">Masjid Box</button>
+      <button class="tab" data-tab="donations" onclick="switchTab('donations',this)">Donations</button>
+      <button class="tab" data-tab="users" onclick="switchTab('users',this)" id="tab-users-btn">Users</button>
+    </div>
+
+    <!-- MEMBERS -->
+    <div id="tab-members">
+      <div class="card" id="member-form-card">
+        <h3>Add Member</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Full name</label><input id="m-name" placeholder="e.g. Boodhun Iqbal" /></div>
+          <div class="form-group"><label>Annual fee (Rs)</label><input id="m-fee" type="number" value="1200" /></div>
+        </div>
+        <div class="form-row three">
+          <div class="form-group"><label>Date joined</label><input id="m-date" type="date" /></div>
+          <div class="form-group"><label>Paid up to (month)</label><input id="m-paid" type="month" /></div>
+          <div class="form-group"><label>Entry fee paid (Rs)</label><input id="m-entry" type="number" placeholder="0" /></div>
+        </div>
+        <div class="form-row"><div class="form-group"><label>Notes</label><input id="m-notes" placeholder="Optional" /></div></div>
+        <div class="flex-end"><button class="btn btn-primary" id="add-member-btn" onclick="addMember()">Add Member</button></div>
+      </div>
+      <div class="search-row">
+        <input id="search" placeholder="Search name..." oninput="renderMembers()" />
+        <select id="filter-status" onchange="renderMembers()">
+          <option value="">All statuses</option>
+          <option value="ok">Up to date</option>
+          <option value="warn">Due soon</option>
+          <option value="late">Overdue</option>
+        </select>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Name</th><th>Fee/yr</th><th>Paid up to</th><th>Status</th><th>Entry fee</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="members-tbody"></tbody>
+      </table></div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div id="tab-payments" style="display:none">
+      <div class="card" id="payment-form-card">
+        <h3>Record Fee Payment</h3>
+        <div class="form-row three">
+          <div class="form-group"><label>Member</label><select id="p-member"><option value="">Select member</option></select></div>
+          <div class="form-group"><label>Date</label><input id="p-date" type="date" /></div>
+          <div class="form-group"><label>Amount (Rs)</label><input id="p-amount" type="number" placeholder="1200" /></div>
+        </div>
+        <div class="form-row three">
+          <div class="form-group"><label>Paid up to (month)</label><input id="p-paidto" type="month" /></div>
+          <div class="form-group"><label>Fine (Rs)</label><input id="p-fine" type="number" placeholder="0" /></div>
+          <div class="form-group"><label>Notes</label><input id="p-notes" placeholder="Optional" /></div>
+        </div>
+        <div class="flex-end"><button class="btn btn-primary" onclick="addPayment()">Record Payment</button></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Member</th><th>Amount</th><th>Paid to</th><th>Fine</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="payments-tbody"></tbody>
+      </table></div>
+    </div>
+
+    <!-- SAAMAN -->
+    <div id="tab-saaman" style="display:none">
+      <div class="card" id="saaman-form-card">
+        <h3>Saaman Rental</h3>
+        <p class="sub">Equipment rental (chairs, tables, etc.) charged to a member.</p>
+        <div class="form-row three">
+          <div class="form-group"><label>Member</label><select id="s-member"><option value="">Select member</option></select></div>
+          <div class="form-group"><label>Date</label><input id="s-date" type="date" /></div>
+          <div class="form-group"><label>Amount charged (Rs)</label><input id="s-amount" type="number" placeholder="0" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Items rented</label><input id="s-items" placeholder="e.g. 20 chairs, 2 tables" /></div>
+          <div class="form-group"><label>Payment status</label>
+            <select id="s-paid"><option value="no">Not yet paid</option><option value="yes">Paid</option></select>
+          </div>
+        </div>
+        <div class="form-row"><div class="form-group"><label>Notes</label><input id="s-notes" placeholder="Optional" /></div></div>
+        <div class="flex-end"><button class="btn btn-primary" onclick="addSaaman()">Record Rental</button></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Member</th><th>Items</th><th>Amount</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="saaman-tbody"></tbody>
+      </table></div>
+    </div>
+
+    <!-- BOX -->
+    <div id="tab-box" style="display:none">
+      <div class="card" id="box-form-card">
+        <h3>Masjid Box Entry</h3>
+        <div class="form-row three">
+          <div class="form-group"><label>Date</label><input id="b-date" type="date" /></div>
+          <div class="form-group"><label>Amount (Rs)</label><input id="b-amount" type="number" placeholder="0" /></div>
+          <div class="form-group"><label>Collected by</label><input id="b-by" placeholder="Name" /></div>
+        </div>
+        <div class="form-row"><div class="form-group"><label>Notes</label><input id="b-notes" placeholder="Optional" /></div></div>
+        <div class="flex-end"><button class="btn btn-primary" onclick="addBox()">Add Entry</button></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Amount</th><th>Collected by</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="box-tbody"></tbody>
+      </table></div>
+    </div>
+
+    <!-- DONATIONS -->
+    <div id="tab-donations" style="display:none">
+      <div class="card" id="donations-form-card">
+        <h3>Record Donation</h3>
+        <div class="form-row three">
+          <div class="form-group"><label>Date</label><input id="d-date" type="date" /></div>
+          <div class="form-group"><label>Donor name</label><input id="d-donor" placeholder="Name or Anonymous" /></div>
+          <div class="form-group"><label>Amount (Rs)</label><input id="d-amount" type="number" placeholder="0" /></div>
+        </div>
+        <div class="form-row"><div class="form-group"><label>Purpose / Notes</label><input id="d-notes" placeholder="e.g. Ramadan sadaqah" /></div></div>
+        <div class="flex-end"><button class="btn btn-primary" onclick="addDonation()">Record Donation</button></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Donor</th><th>Amount</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="donations-tbody"></tbody>
+      </table></div>
+    </div>
+
+    <!-- USERS (admin only) -->
+    <div id="tab-users" style="display:none">
+      <div class="card">
+        <h3>Create User</h3>
+        <div class="form-row three">
+          <div class="form-group"><label>Username</label><input id="u-name" placeholder="e.g. ahmed" /></div>
+          <div class="form-group"><label>Password</label><input id="u-pass" type="password" placeholder="Password" /></div>
+          <div class="form-group"><label>Access level</label>
+            <select id="u-access">
+              <option value="rw">Read &amp; Write</option>
+              <option value="ro">Read Only</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px"><label>Module access</label>
+          <div class="modules-grid">
+            <label class="module-check"><input type="checkbox" id="u-mod-members" checked /> Members</label>
+            <label class="module-check"><input type="checkbox" id="u-mod-payments" checked /> Payments</label>
+            <label class="module-check"><input type="checkbox" id="u-mod-saaman" checked /> Saaman</label>
+            <label class="module-check"><input type="checkbox" id="u-mod-box" checked /> Masjid Box</label>
+            <label class="module-check"><input type="checkbox" id="u-mod-donations" checked /> Donations</label>
+          </div>
+        </div>
+        <div class="flex-end"><button class="btn btn-primary" onclick="addUser()">Create User</button></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Username</th><th>Access</th><th>Modules</th><th></th></tr></thead>
+        <tbody id="users-tbody"></tbody>
+      </table></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHbD-RRm9keJvfv-8KEgotqe1V_oX-Xf6X9jgVwEqq9uzJ5fLTysjkrEZ_lZ7PVsJqxg/exec';
+
+// ── Built-in admin (never deletable) ──────────────────────────
+const ADMIN = { username:'admin', password:'Ghawsul@@lam!', role:'admin', modules:['members','payments','saaman','box','donations'] };
+
+const today = new Date().toISOString().split('T')[0];
+const thisMonth = today.slice(0,7);
+
+let db = { members:[], payments:[], saaman:[], box:[], donations:[], users:[] };
+let currentUser = null;
+
+// ── SESSION ───────────────────────────────────────────────────
+function sessionSave(u){ sessionStorage.setItem('msjd_user', JSON.stringify(u)); }
+function sessionLoad(){ const r=sessionStorage.getItem('msjd_user'); return r?JSON.parse(r):null; }
+function sessionClear(){ sessionStorage.removeItem('msjd_user'); }
+
+// ── LOGIN ─────────────────────────────────────────────────────
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  document.getElementById('login-err').style.display='none';
+
+  // Check admin
+  if(u===ADMIN.username && p===ADMIN.password){
+    currentUser={...ADMIN};
+    sessionSave(currentUser);
+    showApp();
+    return;
+  }
+  // Check other users
+  const found = db.users.find(x=>x.username===u && x.password===p);
+  if(found){
+    currentUser={...found};
+    sessionSave(currentUser);
+    showApp();
+    return;
+  }
+  // Try loading from sheet first then recheck
+  loadAndCheckLogin(u,p);
+}
+
+async function loadAndCheckLogin(u,p){
+  try {
+    const res=await fetch(SCRIPT_URL+'?action=read');
+    const data=await res.json();
+    db.users=data.users||[];
+    const found=db.users.find(x=>x.username===u&&x.password===p);
+    if(found){ currentUser={...found}; sessionSave(currentUser); showApp(); }
+    else { document.getElementById('login-err').style.display='block'; }
+  } catch(e){
+    // If no internet, only allow admin login
+    document.getElementById('login-err').style.display='block';
+  }
+}
+
+function doLogout(){
+  currentUser=null; sessionClear();
+  document.getElementById('app-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+}
+
+function showApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-screen').style.display='block';
+  applyPermissions();
+  setDateDefaults();
+  loadFromSheet();
+}
+
+// ── PERMISSIONS ───────────────────────────────────────────────
+function can(action){ return currentUser.role==='admin'||(action==='write'?currentUser.access==='rw':true); }
+function canModule(mod){ return currentUser.role==='admin'||currentUser.modules.includes(mod); }
+
+function applyPermissions(){
+  const u=currentUser;
+  // User badge
+  document.getElementById('user-badge').textContent=u.username+(u.role==='admin'?' (Admin)':u.access==='ro'?' (Read only)':'');
+  // Show/hide tabs
+  ['members','payments','saaman','box','donations'].forEach(mod=>{
+    const btn=document.querySelector(`.tab[data-tab="${mod}"]`);
+    if(btn) btn.style.display=canModule(mod)?'':'none';
+  });
+  // Users tab — admin only
+  document.getElementById('tab-users-btn').style.display=u.role==='admin'?'':'none';
+  // Hide add forms if read only
+  ['member-form-card','payment-form-card','saaman-form-card','box-form-card','donations-form-card'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display=can('write')?'':'none';
+  });
+  // Switch to first allowed tab
+  const firstAllowed=['members','payments','saaman','box','donations'].find(m=>canModule(m));
+  if(firstAllowed){ const btn=document.querySelector(`.tab[data-tab="${firstAllowed}"]`); if(btn) switchTab(firstAllowed,btn); }
+}
+
+function setDateDefaults(){
+  ['m-date','p-date','s-date','b-date','d-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});
+  ['m-paid','p-paidto'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=thisMonth;});
+}
+
+// ── GOOGLE SHEETS ─────────────────────────────────────────────
+function setConn(state,msg){
+  const el=document.getElementById('conn-status');
+  el.className='conn '+(state==='ok'?'conn-ok':state==='err'?'conn-err':'conn-wait');
+  el.textContent=msg;
+}
+
+async function loadFromSheet(){
+  setConn('wait','Connecting...');
+  document.getElementById('refresh-btn').disabled=true;
+  try {
+    const res=await fetch(SCRIPT_URL+'?action=read');
+    const data=await res.json();
+    if(data.error) throw new Error(data.error);
+    db.members   = data.members   || [];
+    db.payments  = data.payments  || [];
+    db.saaman    = data.saaman    || [];
+    db.box       = data.box       || [];
+    db.donations = data.donations || [];
+    db.users     = data.users     || [];
+    setConn('ok','Connected to Google Sheets');
+    renderAll();
+  } catch(err){
+    setConn('err','Connection failed');
+    console.error(err);
+  }
+  document.getElementById('refresh-btn').disabled=false;
+}
+
+async function saveToSheet(){
+  try {
+    await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'write',payload:db})});
+  } catch(e){ console.error('Save error',e); }
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function memberStatus(m){
+  const now=new Date();const y=now.getFullYear();const mo=now.getMonth()+1;
+  const cur=y+'-'+String(mo).padStart(2,'0');
+  if(!m.paidTo) return 'late';
+  if(String(m.paidTo)>=cur) return 'ok';
+  const[py,pm]=String(m.paidTo).split('-').map(Number);
+  return ((y-py)*12+(mo-pm))<=2?'warn':'late';
+}
+function statusBadge(s){
+  if(s==='ok')   return '<span class="badge badge-ok">Up to date</span>';
+  if(s==='warn') return '<span class="badge badge-warn">Due soon</span>';
+  return '<span class="badge badge-late">Overdue</span>';
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function renderStats(){
+  const feeTotal  = db.payments.reduce((a,p)=>a+Number(p.amount||0),0);
+  const saamTotal = db.saaman.reduce((a,s)=>a+Number(s.amount||0),0);
+  const saamDue   = db.saaman.filter(s=>s.paid==='no').reduce((a,s)=>a+Number(s.amount||0),0);
+  const boxTotal  = db.box.reduce((a,b)=>a+Number(b.amount||0),0);
+  const donTotal  = db.donations.reduce((a,d)=>a+Number(d.amount||0),0);
+  const overdue   = db.members.filter(m=>memberStatus(m)==='late').length;
+  const grand     = feeTotal+saamTotal+boxTotal+donTotal;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="label">Members</div><div class="value">${db.members.length}</div></div>
+    <div class="stat"><div class="label">Fees collected</div><div class="value" style="color:#27ae60">Rs ${feeTotal.toLocaleString()}</div></div>
+    <div class="stat"><div class="label">Saaman income</div><div class="value" style="color:#27ae60">Rs ${saamTotal.toLocaleString()}</div></div>
+    <div class="stat"><div class="label">Saaman unpaid</div><div class="value" style="color:#e67e22">Rs ${saamDue.toLocaleString()}</div></div>
+    <div class="stat"><div class="label">Masjid box</div><div class="value" style="color:#27ae60">Rs ${boxTotal.toLocaleString()}</div></div>
+    <div class="stat"><div class="label">Donations</div><div class="value" style="color:#27ae60">Rs ${donTotal.toLocaleString()}</div></div>
+    <div class="stat"><div class="label">Overdue members</div><div class="value" style="color:#e74c3c">${overdue}</div></div>
+    <div class="stat"><div class="label">Grand total</div><div class="value">Rs ${grand.toLocaleString()}</div></div>
+  `;
+}
+
+function renderMembers(){
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  const fs=document.getElementById('filter-status').value;
+  const list=db.members.filter(m=>{
+    if(q&&!String(m.name).toLowerCase().includes(q)) return false;
+    if(fs&&memberStatus(m)!==fs) return false;
+    return true;
+  });
+  const tbody=document.getElementById('members-tbody');
+  if(!list.length){tbody.innerHTML='<tr><td colspan="8" class="empty">No members found</td></tr>';return;}
+  tbody.innerHTML=list.map((m,i)=>`<tr>
+    <td>${i+1}</td><td><strong>${m.name}</strong></td>
+    <td>Rs ${Number(m.fee||0).toLocaleString()}</td>
+    <td>${m.paidTo||'—'}</td><td>${statusBadge(memberStatus(m))}</td>
+    <td>${Number(m.entryFee||0)>0?'Rs '+Number(m.entryFee).toLocaleString():'—'}</td>
+    <td style="color:#888">${m.notes||''}</td>
+    <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteMember('${m.id}')">Remove</button>`:''}</td>
+  </tr>`).join('');
+}
+
+async function addMember(){
+  if(!can('write')) return alert('You have read-only access');
+  const name=document.getElementById('m-name').value.trim();
+  if(!name) return alert('Please enter a name');
+  const btn=document.getElementById('add-member-btn');
+  btn.disabled=true; btn.textContent='Saving...';
+  db.members.push({id:String(Date.now()),name,fee:document.getElementById('m-fee').value||'1200',joinDate:document.getElementById('m-date').value,paidTo:document.getElementById('m-paid').value,entryFee:document.getElementById('m-entry').value||'0',notes:document.getElementById('m-notes').value});
+  await saveToSheet(); renderAll();
+  ['m-name','m-entry','m-notes'].forEach(id=>document.getElementById(id).value='');
+  btn.disabled=false; btn.textContent='Add Member';
+}
+async function deleteMember(id){
+  if(!can('write')) return;
+  if(!confirm('Remove this member?')) return;
+  db.members=db.members.filter(m=>String(m.id)!==String(id));
+  await saveToSheet(); renderAll();
+}
+
+function populateMemberSelects(){
+  const opts='<option value="">Select member</option>'+db.members.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  ['p-member','s-member'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+}
+
+function renderPayments(){
+  const tbody=document.getElementById('payments-tbody');
+  const list=[...db.payments].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No payments recorded</td></tr>';return;}
+  tbody.innerHTML=list.map(p=>{const m=db.members.find(x=>String(x.id)===String(p.memberId));return`<tr>
+    <td>${p.date}</td><td>${m?m.name:p.memberName||'—'}</td>
+    <td class="pos">Rs ${Number(p.amount||0).toLocaleString()}</td>
+    <td>${p.paidTo||'—'}</td>
+    <td>${Number(p.fine||0)>0?'<span class="neg">Rs '+Number(p.fine).toLocaleString()+'</span>':'—'}</td>
+    <td style="color:#888">${p.notes||''}</td>
+    <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deletePayment('${p.id}')">Del</button>`:''}</td>
+  </tr>`;}).join('');
+}
+async function addPayment(){
+  if(!can('write')) return alert('You have read-only access');
+  const mid=document.getElementById('p-member').value;
+  const m=db.members.find(x=>String(x.id)===String(mid));
+  if(!m) return alert('Select a member');
+  const amount=document.getElementById('p-amount').value;
+  if(!amount) return alert('Enter amount');
+  const paidTo=document.getElementById('p-paidto').value;
+  if(paidTo) m.paidTo=paidTo;
+  db.payments.push({id:String(Date.now()),memberId:mid,memberName:m.name,date:document.getElementById('p-date').value,amount,paidTo,fine:document.getElementById('p-fine').value||'0',notes:document.getElementById('p-notes').value});
+  await saveToSheet(); renderAll();
+  ['p-amount','p-fine','p-notes'].forEach(id=>document.getElementById(id).value='');
+}
+async function deletePayment(id){if(!can('write'))return;db.payments=db.payments.filter(p=>String(p.id)!==String(id));await saveToSheet();renderAll();}
+
+function renderSaaman(){
+  const tbody=document.getElementById('saaman-tbody');
+  const list=[...db.saaman].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No saaman rentals recorded</td></tr>';return;}
+  tbody.innerHTML=list.map(s=>{const m=db.members.find(x=>String(x.id)===String(s.memberId));return`<tr>
+    <td>${s.date}</td><td>${m?m.name:s.memberName||'—'}</td>
+    <td style="color:#888">${s.items||'—'}</td>
+    <td class="pos">Rs ${Number(s.amount||0).toLocaleString()}</td>
+    <td>${s.paid==='yes'?'<span class="badge badge-paid">Paid</span>':'<span class="badge badge-unpaid">Unpaid</span>'}</td>
+    <td style="color:#888">${s.notes||''}</td>
+    <td style="display:flex;gap:4px;flex-wrap:wrap">
+      ${s.paid==='no'&&can('write')?`<button class="btn btn-sm" onclick="markSaamanPaid('${s.id}')">Mark paid</button>`:''}
+      ${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteSaaman('${s.id}')">Del</button>`:''}
+    </td>
+  </tr>`;}).join('');
+}
+async function addSaaman(){
+  if(!can('write')) return alert('You have read-only access');
+  const mid=document.getElementById('s-member').value;
+  const m=db.members.find(x=>String(x.id)===String(mid));
+  if(!m) return alert('Select a member');
+  const amount=document.getElementById('s-amount').value;
+  if(!amount) return alert('Enter amount');
+  db.saaman.push({id:String(Date.now()),memberId:mid,memberName:m.name,date:document.getElementById('s-date').value,amount,items:document.getElementById('s-items').value,paid:document.getElementById('s-paid').value,notes:document.getElementById('s-notes').value});
+  await saveToSheet(); renderAll();
+  ['s-amount','s-items','s-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('s-paid').value='no';
+}
+async function markSaamanPaid(id){if(!can('write'))return;const s=db.saaman.find(x=>String(x.id)===String(id));if(s)s.paid='yes';await saveToSheet();renderAll();}
+async function deleteSaaman(id){if(!can('write'))return;db.saaman=db.saaman.filter(s=>String(s.id)!==String(id));await saveToSheet();renderAll();}
+
+function renderBox(){
+  const tbody=document.getElementById('box-tbody');
+  const list=[...db.box].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  if(!list.length){tbody.innerHTML='<tr><td colspan="5" class="empty">No entries yet</td></tr>';return;}
+  tbody.innerHTML=list.map(b=>`<tr>
+    <td>${b.date}</td><td class="pos">Rs ${Number(b.amount||0).toLocaleString()}</td>
+    <td>${b.by||'—'}</td><td style="color:#888">${b.notes||''}</td>
+    <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteBox('${b.id}')">Del</button>`:''}</td>
+  </tr>`).join('');
+}
+async function addBox(){
+  if(!can('write')) return alert('You have read-only access');
+  const amount=document.getElementById('b-amount').value;
+  if(!amount) return alert('Enter amount');
+  db.box.push({id:String(Date.now()),date:document.getElementById('b-date').value,amount,by:document.getElementById('b-by').value,notes:document.getElementById('b-notes').value});
+  await saveToSheet(); renderAll();
+  ['b-amount','b-by','b-notes'].forEach(id=>document.getElementById(id).value='');
+}
+async function deleteBox(id){if(!can('write'))return;db.box=db.box.filter(b=>String(b.id)!==String(id));await saveToSheet();renderAll();}
+
+function renderDonations(){
+  const tbody=document.getElementById('donations-tbody');
+  const list=[...db.donations].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  if(!list.length){tbody.innerHTML='<tr><td colspan="5" class="empty">No donations yet</td></tr>';return;}
+  tbody.innerHTML=list.map(d=>`<tr>
+    <td>${d.date}</td><td><strong>${d.donor||'Anonymous'}</strong></td>
+    <td class="pos">Rs ${Number(d.amount||0).toLocaleString()}</td>
+    <td style="color:#888">${d.notes||''}</td>
+    <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteDonation('${d.id}')">Del</button>`:''}</td>
+  </tr>`).join('');
+}
+async function addDonation(){
+  if(!can('write')) return alert('You have read-only access');
+  const amount=document.getElementById('d-amount').value;
+  if(!amount) return alert('Enter amount');
+  db.donations.push({id:String(Date.now()),date:document.getElementById('d-date').value,donor:document.getElementById('d-donor').value||'Anonymous',amount,notes:document.getElementById('d-notes').value});
+  await saveToSheet(); renderAll();
+  ['d-donor','d-amount','d-notes'].forEach(id=>document.getElementById(id).value='');
+}
+async function deleteDonation(id){if(!can('write'))return;db.donations=db.donations.filter(d=>String(d.id)!==String(id));await saveToSheet();renderAll();}
+
+// ── USERS ─────────────────────────────────────────────────────
+function renderUsers(){
+  const tbody=document.getElementById('users-tbody');
+  const list=db.users||[];
+  if(!list.length){tbody.innerHTML='<tr><td colspan="4" class="empty">No users created yet</td></tr>';return;}
+  tbody.innerHTML=list.map(u=>`<tr>
+    <td><strong>${u.username}</strong></td>
+    <td>${u.access==='rw'?'<span class="badge badge-rw">Read &amp; Write</span>':'<span class="badge badge-ro">Read Only</span>'}</td>
+    <td style="font-size:12px;color:#555">${(u.modules||[]).join(', ')}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="deleteUser('${u.username}')">Remove</button></td>
+  </tr>`).join('');
+}
+
+async function addUser(){
+  const username=document.getElementById('u-name').value.trim().toLowerCase();
+  const password=document.getElementById('u-pass').value;
+  const access=document.getElementById('u-access').value;
+  if(!username||!password) return alert('Enter username and password');
+  if(username==='admin') return alert('Cannot use "admin" as username');
+  if(db.users.find(u=>u.username===username)) return alert('Username already exists');
+  const modules=['members','payments','saaman','box','donations'].filter(m=>document.getElementById('u-mod-'+m).checked);
+  if(!modules.length) return alert('Select at least one module');
+  db.users.push({username,password,access,modules});
+  await saveToSheet(); renderUsers();
+  document.getElementById('u-name').value='';
+  document.getElementById('u-pass').value='';
+}
+
+async function deleteUser(username){
+  if(!confirm('Remove user '+username+'?')) return;
+  db.users=db.users.filter(u=>u.username!==username);
+  await saveToSheet(); renderUsers();
+}
+
+function renderAll(){
+  renderStats(); renderMembers(); populateMemberSelects();
+  renderPayments(); renderSaaman(); renderBox(); renderDonations(); renderUsers();
+}
+
+function switchTab(name,el){
+  ['members','payments','saaman','box','donations','users'].forEach(t=>{
+    const el2=document.getElementById('tab-'+t);
+    if(el2) el2.style.display=t===name?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+function exportCSV(){
+  let csv='MEMBERS\nName,Fee/yr,Paid To,Status,Entry Fee,Notes\n';
+  db.members.forEach(m=>{csv+=`"${m.name}",${m.fee},${m.paidTo||''},${memberStatus(m)},${m.entryFee||0},"${m.notes||''}"\n`;});
+  csv+='\nPAYMENTS\nDate,Member,Amount,Paid To,Fine,Notes\n';
+  db.payments.forEach(p=>{const m=db.members.find(x=>String(x.id)===String(p.memberId));csv+=`${p.date},"${m?m.name:p.memberName}",${p.amount},${p.paidTo||''},${p.fine||0},"${p.notes||''}"\n`;});
+  csv+='\nSAAMAN\nDate,Member,Items,Amount,Paid,Notes\n';
+  db.saaman.forEach(s=>{const m=db.members.find(x=>String(x.id)===String(s.memberId));csv+=`${s.date},"${m?m.name:s.memberName}","${s.items||''}",${s.amount},${s.paid},"${s.notes||''}"\n`;});
+  csv+='\nMAJID BOX\nDate,Amount,Collected By,Notes\n';
+  db.box.forEach(b=>{csv+=`${b.date},${b.amount},"${b.by||''}","${b.notes||''}"\n`;});
+  csv+='\nDONATIONS\nDate,Donor,Amount,Notes\n';
+  db.donations.forEach(d=>{csv+=`${d.date},"${d.donor}",${d.amount},"${d.notes||''}"\n`;});
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='masjid_ledger.csv';a.click();
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+const saved = sessionLoad();
+if(saved){ currentUser=saved; showApp(); }
+</script>
+</body>
+</html>
