@@ -524,8 +524,16 @@ const SAAMAN_ITEMS = [
 // ── Built-in admin (never deletable) ──────────────────────────
 const ADMIN = { username:'admin', password:'Ghawsul@@lam!', role:'admin', modules:['members','payments','saaman','box','donations'] };
 
-const today = new Date().toISOString().split('T')[0];
-const thisMonth = today.slice(0,7);
+function getLocalDate(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function getLocalMonth(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+const today = getLocalDate();
+const thisMonth = getLocalMonth();
 
 let db = { members:[], payments:[], saaman:[], box:[], donations:[], users:[], receiptCounter:0 };
 let currentUser = null;
@@ -661,34 +669,32 @@ async function saveToSheet(){
 // ── HELPERS ───────────────────────────────────────────────────
 function formatMonth(val){
   if(!val) return '—';
-  const d = new Date(val);
-  if(isNaN(d)) {
-    // Try parsing YYYY-MM format directly
-    const parts = String(val).split('-');
-    if(parts.length>=2){
-      const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-      const m=parseInt(parts[1])-1;
-      return months[m]+' '+parts[0];
-    }
-    return val;
+  // Strip time if present, treat as local string
+  const s=String(val).split('T')[0];
+  const parts=s.split('-');
+  if(parts.length>=2){
+    const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const m=parseInt(parts[1])-1;
+    if(m>=0&&m<12) return months[m]+' '+parts[0];
   }
-  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  return months[d.getMonth()]+' '+d.getFullYear();
+  return val;
 }
 
 function formatDate(val){
   if(!val) return '—';
+  // Always strip time and treat as local date string YYYY-MM-DD
   const s=String(val).split('T')[0];
   const parts=s.split('-');
   if(parts.length<3) return s;
   const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   const m=parseInt(parts[1])-1;
+  if(m<0||m>11) return s;
   return parts[2]+'/'+months[m]+'/'+parts[0];
 }
 
 function memberStatus(m){
   const now=new Date();const y=now.getFullYear();const mo=now.getMonth()+1;
-  const cur=y+'-'+String(mo).padStart(2,'0');
+  const cur=y+'-'+String(mo).padStart(2,'0'); // local month
   if(!m.paidTo) return 'late';
   // Strip time if full date string e.g. 2026-03-31T20:00:00.000Z → 2026-03
   const raw=String(m.paidTo).split('T')[0];
@@ -710,7 +716,7 @@ function statusBadge(s){
 function getStatsFilter(){
   const type=document.getElementById('stats-filter-type')?document.getElementById('stats-filter-type').value:'month';
   const now=new Date();
-  const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'); // local
   const curYear=String(now.getFullYear());
   let prefix='',label='';
   if(type==='month'){
@@ -1209,8 +1215,8 @@ function generateReport(){
 
   document.getElementById('rpt-title').textContent=title;
   const now=new Date();
-  document.getElementById('rpt-generated').textContent='Generated: '+formatDate(now.toISOString());
-  document.getElementById('rpt-gen-date').textContent=formatDate(now.toISOString());
+  document.getElementById('rpt-generated').textContent='Generated: '+formatDate(getLocalDate());
+  document.getElementById('rpt-gen-date').textContent=formatDate(getLocalDate());
 
   // Fees
   const feesTotal=fees.reduce((a,p)=>a+Number(p.amount||0),0);
