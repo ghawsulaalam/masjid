@@ -261,7 +261,7 @@
         <div class="flex-end"><button class="btn btn-primary" onclick="addSaaman()">Record Rental</button></div>
       </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Date</th><th>Member</th><th>Items</th><th>Amount</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>Date</th><th>Member</th><th>Items</th><th>Amount</th><th>Status</th><th>Receipt #</th><th>Notes</th><th></th></tr></thead>
         <tbody id="saaman-tbody"></tbody>
       </table></div>
     </div>
@@ -668,10 +668,10 @@ async function saveToSheet(){
 
 // ── HELPERS ───────────────────────────────────────────────────
 function formatMonth(val){
-  if(!val) return '—';
-  // Strip time if present, treat as local string
-  const s=String(val).split('T')[0];
-  const parts=s.split('-');
+  if(!val||val==='0') return '—';
+  const ymd=parseToYMD(val);
+  if(!ymd) return '—';
+  const parts=ymd.split('-');
   if(parts.length>=2){
     const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
     const m=parseInt(parts[1])-1;
@@ -680,30 +680,46 @@ function formatMonth(val){
   return val;
 }
 
+function parseToYMD(val){
+  if(!val) return null;
+  const s=String(val).trim();
+  if(!s||s==='—'||s==='0') return null;
+  // Already YYYY-MM-DD or YYYY-MM
+  if(/^\d{4}-\d{2}(-\d{2})?/.test(s)) return s.split('T')[0];
+  // Try parsing as Date (handles "Mon Apr 6 2026", full ISO strings etc)
+  const d=new Date(s);
+  if(!isNaN(d)){
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,'0');
+    const dd=String(d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+dd;
+  }
+  return s;
+}
+
 function formatDate(val){
-  if(!val) return '—';
-  // Always strip time and treat as local date string YYYY-MM-DD
-  const s=String(val).split('T')[0];
-  const parts=s.split('-');
-  if(parts.length<3) return s;
+  if(!val||val==='0') return '—';
+  const ymd=parseToYMD(val);
+  if(!ymd) return '—';
+  const parts=ymd.split('-');
+  if(parts.length<3) return ymd;
   const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   const m=parseInt(parts[1])-1;
-  if(m<0||m>11) return s;
+  if(m<0||m>11) return ymd;
   return parts[2]+'/'+months[m]+'/'+parts[0];
 }
 
 function memberStatus(m){
   const now=new Date();const y=now.getFullYear();const mo=now.getMonth()+1;
-  const cur=y+'-'+String(mo).padStart(2,'0'); // local month
-  if(!m.paidTo) return 'late';
-  // Strip time if full date string e.g. 2026-03-31T20:00:00.000Z → 2026-03
-  const raw=String(m.paidTo).split('T')[0];
-  const parts=raw.split('-');
+  const cur=y+'-'+String(mo).padStart(2,'0');
+  if(!m.paidTo||m.paidTo==='0') return 'late';
+  const ymd=parseToYMD(m.paidTo)||'';
+  const parts=ymd.split('-');
+  if(parts.length<2) return 'late';
   const paidStr=parts[0]+'-'+parts[1];
   if(paidStr>=cur) return 'ok';
   const py=parseInt(parts[0]); const pm=parseInt(parts[1]);
   const monthsBehind=(y-py)*12+(mo-pm);
-  // Due soon: 1-2 months behind, Non member: 3+ months behind
   return monthsBehind<=2?'warn':'late';
 }
 function statusBadge(s){
@@ -753,7 +769,10 @@ function onStatsFilterChange(){
 
 function filterByPrefix(arr,prefix){
   if(!prefix) return arr;
-  return arr.filter(x=>String(x.date||'').startsWith(prefix));
+  return arr.filter(x=>{
+    const ymd=parseToYMD(x.date||'')||'';
+    return ymd.startsWith(prefix);
+  });
 }
 
 function renderStats(){
@@ -861,6 +880,7 @@ function getSaamanIsNonMember(){
   const opt=sel?sel.options[sel.selectedIndex]:null;
   return opt?opt.getAttribute('data-status')==='late':false;
 }
+function isWalkinRecord(s){ return s.isWalkin===true||s.isWalkin==='true'; }
 
 function renderSaamanItems(){
   const isNM=getSaamanIsNonMember();
@@ -961,10 +981,11 @@ function renderSaaman(){
   const list=[...db.saaman].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No saaman rentals recorded</td></tr>';return;}
   tbody.innerHTML=list.map(s=>{const m=db.members.find(x=>String(x.id)===String(s.memberId));return`<tr>
-    <td>${formatDate(s.date)}</td><td>${s.memberName||'—'} ${s.isWalkin?'<span class="badge badge-late" style="font-size:10px">Walk-in</span>':m&&memberStatus(m)==='late'?'<span class="badge badge-late" style="font-size:10px">Non member</span>':''}</td>
+    <td>${formatDate(s.date)}</td><td>${s.memberName||'—'} ${s.isWalkin===true||s.isWalkin==='true'?'<span class="badge badge-late" style="font-size:10px">Walk-in</span>':m&&memberStatus(m)==='late'?'<span class="badge badge-late" style="font-size:10px">Non member</span>':''}</td>
     <td style="color:#888">${s.items||'—'}</td>
     <td class="pos">Rs ${Number(s.amount||0).toLocaleString()}</td>
     <td>${s.paid==='yes'?'<span class="badge badge-paid">Paid</span>':'<span class="badge badge-unpaid">Unpaid</span>'}</td>
+    <td style="color:#888;font-size:11px">${s.receiptNo||'—'}</td>
     <td style="color:#888">${s.notes||''}</td>
     <td style="display:flex;gap:4px;flex-wrap:wrap">
       ${can('write')?`<button class="btn btn-sm" onclick="editSaaman('${s.id}')">Edit</button>`:''}
@@ -1009,7 +1030,10 @@ async function addSaaman(){
     const latest=await res.json();
     if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}
   } catch(e){ console.error(e); }
-  db.saaman.push({id:String(Date.now()),memberId:mid,memberName,isWalkin,date:document.getElementById('s-date').value,amount:String(total),items:itemsStr,paid:document.getElementById('s-paid').value,notes:document.getElementById('s-notes').value});
+  // Generate unique receipt number
+  db.receiptCounter=(parseInt(db.receiptCounter)||0)+1;
+  const receiptNo='RCP-'+String(db.receiptCounter).padStart(6,'0');
+  db.saaman.push({id:String(Date.now()),memberId:mid,memberName,isWalkin,date:document.getElementById('s-date').value,amount:String(total),items:itemsStr,paid:document.getElementById('s-paid').value,notes:document.getElementById('s-notes').value,receiptNo});
   await saveToSheet(); renderAll();
   // Reset form
   SAAMAN_ITEMS.forEach((_,i)=>{const el=document.getElementById('sq-'+i);if(el)el.value='0';});
@@ -1067,17 +1091,12 @@ async function saveSaamanEdit(){
 function showReceipt(id){
   const s=db.saaman.find(x=>String(x.id)===String(id));
   if(!s) return;
-  // Generate receipt number if not exists
-  if(!s.receiptNo){
-    db.receiptCounter=(db.receiptCounter||0)+1;
-    s.receiptNo='RCP-'+String(db.receiptCounter).padStart(6,'0');
-    saveToSheet();
-  }
   const m=db.members.find(x=>String(x.id)===String(s.memberId));
   document.getElementById('r-no').textContent=s.receiptNo;
   document.getElementById('r-date').textContent=formatDate(s.date);
   document.getElementById('r-person').textContent=s.memberName||'—';
-  document.getElementById('r-status').innerHTML=s.isWalkin?'<span class="receipt-status-unpaid">Non Member (Walk-in)</span>':!m?'—':memberStatus(m)==='ok'?'<span class="receipt-status-paid">Member</span>':memberStatus(m)==='warn'?'<span style="color:#856404;font-weight:700">Due soon</span>':'<span class="receipt-status-unpaid">Non Member</span>';
+  const isWalk=s.isWalkin===true||s.isWalkin==='true';
+  document.getElementById('r-status').innerHTML=isWalk?'<span class="receipt-status-unpaid">Non Member (Walk-in)</span>':!m?'—':memberStatus(m)==='ok'?'<span class="receipt-status-paid">Member</span>':memberStatus(m)==='warn'?'<span style="color:#856404;font-weight:700">Due soon</span>':'<span class="receipt-status-unpaid">Non Member</span>';
   document.getElementById('r-items').textContent=s.items||'—';
   document.getElementById('r-notes').textContent=s.notes||'—';
   document.getElementById('r-amount').textContent='Rs '+Number(s.amount||0).toLocaleString();
@@ -1199,18 +1218,18 @@ function generateReport(){
     const [y,m]=month.split('-');
     const mName=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][parseInt(m)-1];
     title='Monthly Collection Report — '+mName+' '+y;
-    fees=db.payments.filter(p=>String(p.date).startsWith(month));
-    box=db.box.filter(b=>String(b.date).startsWith(month));
-    donations=db.donations.filter(d=>String(d.date).startsWith(month));
-    saaman=db.saaman.filter(s=>String(s.date).startsWith(month));
+    fees=db.payments.filter(p=>(parseToYMD(p.date)||'').startsWith(month));
+    box=db.box.filter(b=>(parseToYMD(b.date)||'').startsWith(month));
+    donations=db.donations.filter(d=>(parseToYMD(d.date)||'').startsWith(month));
+    saaman=db.saaman.filter(s=>(parseToYMD(s.date)||'').startsWith(month));
   } else {
     const date=document.getElementById('rpt-date').value;
     if(!date) return alert('Please select a date');
     title='Session Report — '+formatDate(date);
-    fees=db.payments.filter(p=>String(p.date).split('T')[0]===date);
-    box=db.box.filter(b=>String(b.date).split('T')[0]===date);
-    donations=db.donations.filter(d=>String(d.date).split('T')[0]===date);
-    saaman=db.saaman.filter(s=>String(s.date).split('T')[0]===date);
+    fees=db.payments.filter(p=>(parseToYMD(p.date)||'')===date);
+    box=db.box.filter(b=>(parseToYMD(b.date)||'')===date);
+    donations=db.donations.filter(d=>(parseToYMD(d.date)||'')===date);
+    saaman=db.saaman.filter(s=>(parseToYMD(s.date)||'')===date);
   }
 
   document.getElementById('rpt-title').textContent=title;
