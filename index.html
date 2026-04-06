@@ -83,6 +83,30 @@
     .form-row,.form-row.three { grid-template-columns:1fr; }
     .stats { grid-template-columns:1fr 1fr; }
   }
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
+  .modal-overlay.active { display:flex; }
+  .receipt-box { background:#fff; border-radius:10px; padding:32px; width:100%; max-width:420px; margin:16px; }
+  .receipt-header { text-align:center; margin-bottom:20px; border-bottom:2px solid #1a1a1a; padding-bottom:14px; }
+  .receipt-header h2 { font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:4px; }
+  .receipt-header p { font-size:12px; color:#666; }
+  .receipt-no { font-size:11px; color:#999; margin-top:4px; }
+  .receipt-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:0.5px solid #f0f0f0; font-size:13px; }
+  .receipt-row .label { color:#666; }
+  .receipt-row .value { font-weight:500; text-align:right; max-width:60%; }
+  .receipt-total { display:flex; justify-content:space-between; padding:10px 0; font-size:15px; font-weight:700; border-top:2px solid #1a1a1a; margin-top:6px; }
+  .receipt-footer { text-align:center; font-size:11px; color:#999; margin-top:16px; }
+  .receipt-status-paid { color:#155724; font-weight:700; }
+  .receipt-status-unpaid { color:#721c24; font-weight:700; }
+  .receipt-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+  @media print {
+    body * { visibility:hidden; }
+    .receipt-box, .receipt-box * { visibility:visible; }
+    .receipt-box { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); box-shadow:none; border:1px solid #ccc; }
+    .receipt-actions { display:none; }
+    #report-content, #report-content * { visibility:visible; }
+    #report-content { position:fixed; left:0; top:0; width:100%; box-shadow:none; }
+    #rpt-actions { display:none !important; }
+  }
 </style>
 </head>
 <body>
@@ -118,12 +142,26 @@
   <div class="container">
     <div class="stats" id="stats"></div>
 
-    <div class="tabs" id="tabs-bar">
+    <!-- Stats filter -->
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+    <select id="stats-filter-type" onchange="onStatsFilterChange()" style="width:auto;padding:6px 10px;font-size:12px;">
+      <option value="month">Current month</option>
+      <option value="custom-month">Select month</option>
+      <option value="custom-year">Select year</option>
+      <option value="all">All time</option>
+    </select>
+    <input id="stats-filter-month" type="month" style="display:none;width:auto;padding:6px 10px;font-size:12px;" onchange="renderStats()" />
+    <select id="stats-filter-year" style="display:none;width:auto;padding:6px 10px;font-size:12px;" onchange="renderStats()"></select>
+    <span id="stats-filter-label" style="font-size:12px;color:#777;"></span>
+  </div>
+
+  <div class="tabs" id="tabs-bar">
       <button class="tab active" data-tab="members" onclick="switchTab('members',this)">Members</button>
       <button class="tab" data-tab="payments" onclick="switchTab('payments',this)">Payments</button>
       <button class="tab" data-tab="saaman" onclick="switchTab('saaman',this)">Saaman</button>
       <button class="tab" data-tab="box" onclick="switchTab('box',this)">Masjid Box</button>
       <button class="tab" data-tab="donations" onclick="switchTab('donations',this)">Donations</button>
+      <button class="tab" data-tab="reports" onclick="switchTab('reports',this)">Reports</button>
       <button class="tab" data-tab="users" onclick="switchTab('users',this)" id="tab-users-btn">Users</button>
     </div>
 
@@ -146,10 +184,10 @@
       <div class="search-row">
         <input id="search" placeholder="Search name..." oninput="renderMembers()" />
         <select id="filter-status" onchange="renderMembers()">
-          <option value="">All statuses</option>
-          <option value="ok">Up to date</option>
+          <option value="">All status</option>
+          <option value="ok">Member</option>
           <option value="warn">Due soon</option>
-          <option value="late">Overdue</option>
+          <option value="late">Non member</option>
         </select>
       </div>
       <div class="table-wrap"><table>
@@ -185,8 +223,18 @@
       <div class="card" id="saaman-form-card">
         <h3>Saaman Rental</h3>
         <p class="sub">Equipment rental (chairs, tables, etc.) charged to a member.</p>
+      <div id="s-nonmember-warn" style="display:none;background:#f8d7da;color:#721c24;padding:10px 14px;border-radius:6px;font-size:13px;font-weight:600;margin-bottom:12px;">
+        &#9888; This member is a <strong>Non Member</strong> — a different tariff applies!
+      </div>
         <div class="form-row three">
-          <div class="form-group"><label>Member</label><select id="s-member"><option value="">Select member</option></select></div>
+          <div class="form-group"><label>Person</label>
+          <select id="s-person-type" onchange="toggleSaamanPerson()" style="margin-bottom:6px">
+            <option value="member">Existing member</option>
+            <option value="walkin">Walk-in (non member)</option>
+          </select>
+          <select id="s-member" onchange="onSaamanMemberChange()"><option value="">Select member</option></select>
+          <input id="s-walkin-name" placeholder="Enter name" style="display:none;margin-top:6px" />
+        </div>
           <div class="form-group"><label>Date</label><input id="s-date" type="date" /></div>
           <div class="form-group"><label>Amount charged (Rs)</label><input id="s-amount" type="number" placeholder="0" /></div>
         </div>
@@ -241,6 +289,104 @@
       </table></div>
     </div>
 
+    <!-- REPORTS -->
+    <div id="tab-reports" style="display:none">
+      <div class="card">
+        <h3>Generate Report</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Report type</label>
+            <select id="rpt-type" onchange="toggleReportType()">
+              <option value="monthly">Monthly collection report</option>
+              <option value="session">Saturday session report</option>
+            </select>
+          </div>
+          <div class="form-group" id="rpt-month-group">
+            <label>Select month</label>
+            <input id="rpt-month" type="month" />
+          </div>
+          <div class="form-group" id="rpt-date-group" style="display:none">
+            <label>Select date</label>
+            <input id="rpt-date" type="date" />
+          </div>
+        </div>
+        <div class="flex-end">
+          <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+        </div>
+      </div>
+      <div id="report-output" style="display:none">
+        <div class="card" id="report-content">
+          <div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #1a1a1a;padding-bottom:14px;">
+            <h2 style="font-size:16px;font-weight:700;margin-bottom:4px;">Sunnee Muslim Mosque And Madrassa</h2>
+            <p style="font-size:13px;color:#666;" id="rpt-title"></p>
+            <p style="font-size:11px;color:#999;" id="rpt-generated"></p>
+          </div>
+
+          <!-- Fees section -->
+          <div style="margin-bottom:20px;">
+            <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">MEMBERSHIP FEES</h3>
+            <div class="table-wrap"><table>
+              <thead><tr><th>#</th><th>Member</th><th>Amount</th><th>Paid to</th><th>Fine</th><th>Date</th></tr></thead>
+              <tbody id="rpt-fees-body"></tbody>
+            </table></div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">
+              Total fees: <span id="rpt-fees-total" style="margin-left:12px;color:#27ae60;"></span>
+            </div>
+          </div>
+
+          <!-- Masjid Box section -->
+          <div style="margin-bottom:20px;">
+            <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">MASJID BOX</h3>
+            <div class="table-wrap"><table>
+              <thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Collected by</th><th>Notes</th></tr></thead>
+              <tbody id="rpt-box-body"></tbody>
+            </table></div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">
+              Total box: <span id="rpt-box-total" style="margin-left:12px;color:#27ae60;"></span>
+            </div>
+          </div>
+
+          <!-- Donations section -->
+          <div style="margin-bottom:20px;">
+            <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">DONATIONS</h3>
+            <div class="table-wrap"><table>
+              <thead><tr><th>#</th><th>Date</th><th>Donor</th><th>Amount</th><th>Notes</th></tr></thead>
+              <tbody id="rpt-don-body"></tbody>
+            </table></div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">
+              Total donations: <span id="rpt-don-total" style="margin-left:12px;color:#27ae60;"></span>
+            </div>
+          </div>
+
+          <!-- Saaman section -->
+          <div style="margin-bottom:20px;">
+            <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">SAAMAN RENTALS</h3>
+            <div class="table-wrap"><table>
+              <thead><tr><th>#</th><th>Date</th><th>Person</th><th>Items</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody id="rpt-saam-body"></tbody>
+            </table></div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">
+              Total saaman: <span id="rpt-saam-total" style="margin-left:12px;color:#27ae60;"></span>
+            </div>
+          </div>
+
+          <!-- Grand total -->
+          <div style="background:#1a1a1a;color:#fff;padding:14px 16px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:700;">
+            <span>GRAND TOTAL</span>
+            <span id="rpt-grand-total"></span>
+          </div>
+
+          <div style="text-align:center;font-size:11px;color:#999;margin-top:16px;">
+            Generated on <span id="rpt-gen-date"></span> &mdash; Sunnee Muslim Mosque And Madrassa
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;" id="rpt-actions">
+          <button class="btn" onclick="printReport()">&#128424; Print</button>
+          <button class="btn btn-primary" onclick="downloadReport()">&#11015; Download PDF</button>
+        </div>
+      </div>
+    </div>
+
     <!-- USERS (admin only) -->
     <div id="tab-users" style="display:none">
       <div class="card">
@@ -275,6 +421,33 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receipt-modal">
+  <div class="receipt-box" id="receipt-content">
+    <div class="receipt-header">
+      <h2>Sunnee Muslim Mosque And Madrassa</h2>
+      <p>Saaman Rental Receipt</p>
+      <div class="receipt-no" id="r-no"></div>
+    </div>
+    <div class="receipt-row"><span class="label">Date</span><span class="value" id="r-date"></span></div>
+    <div class="receipt-row"><span class="label">Person</span><span class="value" id="r-person"></span></div>
+    <div class="receipt-row"><span class="label">Status</span><span class="value" id="r-status"></span></div>
+    <div class="receipt-row"><span class="label">Items rented</span><span class="value" id="r-items"></span></div>
+    <div class="receipt-row"><span class="label">Notes</span><span class="value" id="r-notes"></span></div>
+    <div class="receipt-total"><span>Total</span><span id="r-amount"></span></div>
+    <div class="receipt-row"><span class="label">Payment</span><span class="value" id="r-paid"></span></div>
+    <div class="receipt-footer">Thank you &mdash; Sunnee Muslim Mosque And Madrassa</div>
+    <div class="receipt-actions">
+      <button class="btn" onclick="printReceipt()">&#128424; Print</button>
+      <button class="btn btn-primary" onclick="downloadReceipt()">&#11015; Download PDF</button>
+      <button class="btn" onclick="closeReceipt()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHbD-RRm9keJvfv-8KEgotqe1V_oX-Xf6X9jgVwEqq9uzJ5fLTysjkrEZ_lZ7PVsJqxg/exec';
 
@@ -284,7 +457,7 @@ const ADMIN = { username:'admin', password:'Ghawsul@@lam!', role:'admin', module
 const today = new Date().toISOString().split('T')[0];
 const thisMonth = today.slice(0,7);
 
-let db = { members:[], payments:[], saaman:[], box:[], donations:[], users:[] };
+let db = { members:[], payments:[], saaman:[], box:[], donations:[], users:[], receiptCounter:0 };
 let currentUser = null;
 
 // ── SESSION ───────────────────────────────────────────────────
@@ -413,6 +586,33 @@ async function saveToSheet(){
 }
 
 // ── HELPERS ───────────────────────────────────────────────────
+function formatMonth(val){
+  if(!val) return '—';
+  const d = new Date(val);
+  if(isNaN(d)) {
+    // Try parsing YYYY-MM format directly
+    const parts = String(val).split('-');
+    if(parts.length>=2){
+      const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+      const m=parseInt(parts[1])-1;
+      return months[m]+' '+parts[0];
+    }
+    return val;
+  }
+  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  return months[d.getMonth()]+' '+d.getFullYear();
+}
+
+function formatDate(val){
+  if(!val) return '—';
+  const s=String(val).split('T')[0];
+  const parts=s.split('-');
+  if(parts.length<3) return s;
+  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const m=parseInt(parts[1])-1;
+  return parts[2]+'/'+months[m]+'/'+parts[0];
+}
+
 function memberStatus(m){
   const now=new Date();const y=now.getFullYear();const mo=now.getMonth()+1;
   const cur=y+'-'+String(mo).padStart(2,'0');
@@ -422,18 +622,66 @@ function memberStatus(m){
   return ((y-py)*12+(mo-pm))<=2?'warn':'late';
 }
 function statusBadge(s){
-  if(s==='ok')   return '<span class="badge badge-ok">Up to date</span>';
+  if(s==='ok')   return '<span class="badge badge-ok">Member</span>';
   if(s==='warn') return '<span class="badge badge-warn">Due soon</span>';
-  return '<span class="badge badge-late">Overdue</span>';
+  return '<span class="badge badge-late">Non member</span>';
 }
 
 // ── RENDER ────────────────────────────────────────────────────
+function getStatsFilter(){
+  const type=document.getElementById('stats-filter-type')?document.getElementById('stats-filter-type').value:'month';
+  const now=new Date();
+  const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const curYear=String(now.getFullYear());
+  let prefix='',label='';
+  if(type==='month'){
+    prefix=curMonth;
+    const mn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][now.getMonth()];
+    label=mn+' '+now.getFullYear();
+  } else if(type==='custom-month'){
+    prefix=document.getElementById('stats-filter-month').value||curMonth;
+    const[y,m]=prefix.split('-');
+    const mn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][parseInt(m)-1];
+    label=mn+' '+y;
+  } else if(type==='custom-year'){
+    prefix=document.getElementById('stats-filter-year').value||curYear;
+    label=prefix;
+  } else { prefix=''; label='All time'; }
+  const lbl=document.getElementById('stats-filter-label');
+  if(lbl) lbl.textContent=label?'Showing: '+label:'';
+  return prefix;
+}
+
+function onStatsFilterChange(){
+  const type=document.getElementById('stats-filter-type').value;
+  document.getElementById('stats-filter-month').style.display=type==='custom-month'?'':'none';
+  document.getElementById('stats-filter-year').style.display=type==='custom-year'?'':'none';
+  if(type==='custom-year'){
+    const years=new Set();
+    [...db.payments,...db.box,...db.donations,...db.saaman].forEach(x=>{if(x.date)years.add(String(x.date).split('-')[0]);});
+    years.add(String(new Date().getFullYear()));
+    const sel=document.getElementById('stats-filter-year');
+    sel.innerHTML=[...years].sort().reverse().map(y=>`<option value="${y}">${y}</option>`).join('');
+  }
+  renderStats();
+}
+
+function filterByPrefix(arr,prefix){
+  if(!prefix) return arr;
+  return arr.filter(x=>String(x.date||'').startsWith(prefix));
+}
+
 function renderStats(){
-  const feeTotal  = db.payments.reduce((a,p)=>a+Number(p.amount||0),0);
-  const saamTotal = db.saaman.reduce((a,s)=>a+Number(s.amount||0),0);
-  const saamDue   = db.saaman.filter(s=>s.paid==='no').reduce((a,s)=>a+Number(s.amount||0),0);
-  const boxTotal  = db.box.reduce((a,b)=>a+Number(b.amount||0),0);
-  const donTotal  = db.donations.reduce((a,d)=>a+Number(d.amount||0),0);
+  const prefix=getStatsFilter();
+  const payments=filterByPrefix(db.payments,prefix);
+  const saaman=filterByPrefix(db.saaman,prefix);
+  const box=filterByPrefix(db.box,prefix);
+  const donations=filterByPrefix(db.donations,prefix);
+  const feeTotal  = payments.reduce((a,p)=>a+Number(p.amount||0),0);
+  const saamTotal = saaman.reduce((a,s)=>a+Number(s.amount||0),0);
+  const saamDue   = saaman.filter(s=>s.paid==='no').reduce((a,s)=>a+Number(s.amount||0),0);
+  const boxTotal  = box.reduce((a,b)=>a+Number(b.amount||0),0);
+  const donTotal  = donations.reduce((a,d)=>a+Number(d.amount||0),0);
   const overdue   = db.members.filter(m=>memberStatus(m)==='late').length;
   const grand     = feeTotal+saamTotal+boxTotal+donTotal;
   document.getElementById('stats').innerHTML=`
@@ -443,7 +691,7 @@ function renderStats(){
     <div class="stat"><div class="label">Saaman unpaid</div><div class="value" style="color:#e67e22">Rs ${saamDue.toLocaleString()}</div></div>
     <div class="stat"><div class="label">Masjid box</div><div class="value" style="color:#27ae60">Rs ${boxTotal.toLocaleString()}</div></div>
     <div class="stat"><div class="label">Donations</div><div class="value" style="color:#27ae60">Rs ${donTotal.toLocaleString()}</div></div>
-    <div class="stat"><div class="label">Overdue members</div><div class="value" style="color:#e74c3c">${overdue}</div></div>
+    <div class="stat"><div class="label">Non members</div><div class="value" style="color:#e74c3c">${overdue}</div></div>
     <div class="stat"><div class="label">Grand total</div><div class="value">Rs ${grand.toLocaleString()}</div></div>
   `;
 }
@@ -461,7 +709,7 @@ function renderMembers(){
   tbody.innerHTML=list.map((m,i)=>`<tr>
     <td>${i+1}</td><td><strong>${m.name}</strong></td>
     <td>Rs ${Number(m.fee||0).toLocaleString()}</td>
-    <td>${m.paidTo||'—'}</td><td>${statusBadge(memberStatus(m))}</td>
+    <td>${formatMonth(m.paidTo)}</td><td>${statusBadge(memberStatus(m))}</td>
     <td>${Number(m.entryFee||0)>0?'Rs '+Number(m.entryFee).toLocaleString():'—'}</td>
     <td style="color:#888">${m.notes||''}</td>
     <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteMember('${m.id}')">Remove</button>`:''}</td>
@@ -487,8 +735,42 @@ async function deleteMember(id){
 }
 
 function populateMemberSelects(){
-  const opts='<option value="">Select member</option>'+db.members.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
-  ['p-member','s-member'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+  const payOpts='<option value="">Select member</option>'+db.members.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  const el1=document.getElementById('p-member');if(el1)el1.innerHTML=payOpts;
+
+  // Saaman dropdown — show Non member tag
+  const saamOpts='<option value="">Select member</option>'+db.members.map(m=>{
+    const status=memberStatus(m);
+    const tag=status==='late'?' ⚠ NON MEMBER':'';
+    return `<option value="${m.id}" data-status="${status}">${m.name}${tag}</option>`;
+  }).join('');
+  const el2=document.getElementById('s-member');if(el2)el2.innerHTML=saamOpts;
+}
+
+function toggleSaamanPerson(){
+  const type=document.getElementById('s-person-type').value;
+  const memberSel=document.getElementById('s-member');
+  const walkinInput=document.getElementById('s-walkin-name');
+  const warn=document.getElementById('s-nonmember-warn');
+  if(type==='walkin'){
+    memberSel.style.display='none';
+    walkinInput.style.display='block';
+    warn.style.display='block';
+    warn.innerHTML='&#9888; Walk-in <strong>Non Member</strong> — non member tariff applies!';
+  } else {
+    memberSel.style.display='block';
+    walkinInput.style.display='none';
+    onSaamanMemberChange();
+  }
+}
+
+function onSaamanMemberChange(){
+  const sel=document.getElementById('s-member');
+  const warn=document.getElementById('s-nonmember-warn');
+  if(!sel||!warn) return;
+  const opt=sel.options[sel.selectedIndex];
+  const status=opt?opt.getAttribute('data-status'):'';
+  warn.style.display=status==='late'?'block':'none';
 }
 
 function renderPayments(){
@@ -496,9 +778,9 @@ function renderPayments(){
   const list=[...db.payments].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No payments recorded</td></tr>';return;}
   tbody.innerHTML=list.map(p=>{const m=db.members.find(x=>String(x.id)===String(p.memberId));return`<tr>
-    <td>${p.date}</td><td>${m?m.name:p.memberName||'—'}</td>
+    <td>${formatDate(p.date)}</td><td>${m?m.name:p.memberName||'—'}</td>
     <td class="pos">Rs ${Number(p.amount||0).toLocaleString()}</td>
-    <td>${p.paidTo||'—'}</td>
+    <td>${formatMonth(p.paidTo)}</td>
     <td>${Number(p.fine||0)>0?'<span class="neg">Rs '+Number(p.fine).toLocaleString()+'</span>':'—'}</td>
     <td style="color:#888">${p.notes||''}</td>
     <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deletePayment('${p.id}')">Del</button>`:''}</td>
@@ -524,30 +806,84 @@ function renderSaaman(){
   const list=[...db.saaman].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No saaman rentals recorded</td></tr>';return;}
   tbody.innerHTML=list.map(s=>{const m=db.members.find(x=>String(x.id)===String(s.memberId));return`<tr>
-    <td>${s.date}</td><td>${m?m.name:s.memberName||'—'}</td>
+    <td>${formatDate(s.date)}</td><td>${s.memberName||'—'} ${s.isWalkin?'<span class="badge badge-late" style="font-size:10px">Walk-in</span>':m&&memberStatus(m)==='late'?'<span class="badge badge-late" style="font-size:10px">Non member</span>':''}</td>
     <td style="color:#888">${s.items||'—'}</td>
     <td class="pos">Rs ${Number(s.amount||0).toLocaleString()}</td>
     <td>${s.paid==='yes'?'<span class="badge badge-paid">Paid</span>':'<span class="badge badge-unpaid">Unpaid</span>'}</td>
     <td style="color:#888">${s.notes||''}</td>
     <td style="display:flex;gap:4px;flex-wrap:wrap">
       ${s.paid==='no'&&can('write')?`<button class="btn btn-sm" onclick="markSaamanPaid('${s.id}')">Mark paid</button>`:''}
+      <button class="btn btn-sm" onclick="showReceipt('${s.id}')">&#128424; Receipt</button>
       ${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteSaaman('${s.id}')">Del</button>`:''}
     </td>
   </tr>`;}).join('');
 }
 async function addSaaman(){
   if(!can('write')) return alert('You have read-only access');
-  const mid=document.getElementById('s-member').value;
-  const m=db.members.find(x=>String(x.id)===String(mid));
-  if(!m) return alert('Select a member');
+  const personType=document.getElementById('s-person-type').value;
+  let mid='', memberName='', isWalkin=false;
+  if(personType==='walkin'){
+    memberName=document.getElementById('s-walkin-name').value.trim();
+    if(!memberName) return alert('Enter the person name');
+    isWalkin=true;
+  } else {
+    mid=document.getElementById('s-member').value;
+    const m=db.members.find(x=>String(x.id)===String(mid));
+    if(!m) return alert('Select a member');
+    memberName=m.name;
+  }
   const amount=document.getElementById('s-amount').value;
   if(!amount) return alert('Enter amount');
-  db.saaman.push({id:String(Date.now()),memberId:mid,memberName:m.name,date:document.getElementById('s-date').value,amount,items:document.getElementById('s-items').value,paid:document.getElementById('s-paid').value,notes:document.getElementById('s-notes').value});
+  db.saaman.push({id:String(Date.now()),memberId:mid,memberName,isWalkin,date:document.getElementById('s-date').value,amount,items:document.getElementById('s-items').value,paid:document.getElementById('s-paid').value,notes:document.getElementById('s-notes').value});
   await saveToSheet(); renderAll();
-  ['s-amount','s-items','s-notes'].forEach(id=>document.getElementById(id).value='');
+  ['s-amount','s-items','s-notes','s-walkin-name'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('s-paid').value='no';
+  document.getElementById('s-person-type').value='member';
+  toggleSaamanPerson();
 }
 async function markSaamanPaid(id){if(!can('write'))return;const s=db.saaman.find(x=>String(x.id)===String(id));if(s)s.paid='yes';await saveToSheet();renderAll();}
+
+function showReceipt(id){
+  const s=db.saaman.find(x=>String(x.id)===String(id));
+  if(!s) return;
+  // Generate receipt number if not exists
+  if(!s.receiptNo){
+    db.receiptCounter=(db.receiptCounter||0)+1;
+    s.receiptNo='RCP-'+String(db.receiptCounter).padStart(6,'0');
+    saveToSheet();
+  }
+  const m=db.members.find(x=>String(x.id)===String(s.memberId));
+  document.getElementById('r-no').textContent=s.receiptNo;
+  document.getElementById('r-date').textContent=formatDate(s.date);
+  document.getElementById('r-person').textContent=s.memberName||'—';
+  document.getElementById('r-status').innerHTML=s.isWalkin?'<span class="receipt-status-unpaid">Non Member (Walk-in)</span>':!m?'—':memberStatus(m)==='ok'?'<span class="receipt-status-paid">Member</span>':memberStatus(m)==='warn'?'<span style="color:#856404;font-weight:700">Due soon</span>':'<span class="receipt-status-unpaid">Non Member</span>';
+  document.getElementById('r-items').textContent=s.items||'—';
+  document.getElementById('r-notes').textContent=s.notes||'—';
+  document.getElementById('r-amount').textContent='Rs '+Number(s.amount||0).toLocaleString();
+  document.getElementById('r-paid').innerHTML=s.paid==='yes'?'<span class="receipt-status-paid">&#10003; Paid</span>':'<span class="receipt-status-unpaid">&#10007; Not yet paid</span>';
+  document.getElementById('receipt-modal').classList.add('active');
+}
+
+function closeReceipt(){ document.getElementById('receipt-modal').classList.remove('active'); }
+function printReceipt(){ window.print(); }
+
+async function downloadReceipt(){
+  const box=document.getElementById('receipt-content');
+  const rno=document.getElementById('r-no').textContent||'receipt';
+  try {
+    const canvas=await html2canvas(box,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
+    const imgData=canvas.toDataURL('image/png');
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a6'});
+    const pdfW=pdf.internal.pageSize.getWidth();
+    const pdfH=(canvas.height*pdfW)/canvas.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfW,pdfH);
+    pdf.save(rno+'.pdf');
+  } catch(e){
+    alert('Could not generate PDF. Please use Print instead.');
+    console.error(e);
+  }
+}
 async function deleteSaaman(id){if(!can('write'))return;db.saaman=db.saaman.filter(s=>String(s.id)!==String(id));await saveToSheet();renderAll();}
 
 function renderBox(){
@@ -555,7 +891,7 @@ function renderBox(){
   const list=[...db.box].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   if(!list.length){tbody.innerHTML='<tr><td colspan="5" class="empty">No entries yet</td></tr>';return;}
   tbody.innerHTML=list.map(b=>`<tr>
-    <td>${b.date}</td><td class="pos">Rs ${Number(b.amount||0).toLocaleString()}</td>
+    <td>${formatDate(b.date)}</td><td class="pos">Rs ${Number(b.amount||0).toLocaleString()}</td>
     <td>${b.by||'—'}</td><td style="color:#888">${b.notes||''}</td>
     <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteBox('${b.id}')">Del</button>`:''}</td>
   </tr>`).join('');
@@ -575,7 +911,7 @@ function renderDonations(){
   const list=[...db.donations].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   if(!list.length){tbody.innerHTML='<tr><td colspan="5" class="empty">No donations yet</td></tr>';return;}
   tbody.innerHTML=list.map(d=>`<tr>
-    <td>${d.date}</td><td><strong>${d.donor||'Anonymous'}</strong></td>
+    <td>${formatDate(d.date)}</td><td><strong>${d.donor||'Anonymous'}</strong></td>
     <td class="pos">Rs ${Number(d.amount||0).toLocaleString()}</td>
     <td style="color:#888">${d.notes||''}</td>
     <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteDonation('${d.id}')">Del</button>`:''}</td>
@@ -625,13 +961,103 @@ async function deleteUser(username){
   await saveToSheet(); renderUsers();
 }
 
+// ── REPORTS ───────────────────────────────────────────────────
+function toggleReportType(){
+  const type=document.getElementById('rpt-type').value;
+  document.getElementById('rpt-month-group').style.display=type==='monthly'?'':'none';
+  document.getElementById('rpt-date-group').style.display=type==='session'?'':'none';
+}
+
+function generateReport(){
+  const type=document.getElementById('rpt-type').value;
+  let fees,box,donations,saaman,title;
+
+  if(type==='monthly'){
+    const month=document.getElementById('rpt-month').value;
+    if(!month) return alert('Please select a month');
+    const [y,m]=month.split('-');
+    const mName=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][parseInt(m)-1];
+    title='Monthly Collection Report — '+mName+' '+y;
+    fees=db.payments.filter(p=>String(p.date).startsWith(month));
+    box=db.box.filter(b=>String(b.date).startsWith(month));
+    donations=db.donations.filter(d=>String(d.date).startsWith(month));
+    saaman=db.saaman.filter(s=>String(s.date).startsWith(month));
+  } else {
+    const date=document.getElementById('rpt-date').value;
+    if(!date) return alert('Please select a date');
+    title='Session Report — '+formatDate(date);
+    fees=db.payments.filter(p=>String(p.date).split('T')[0]===date);
+    box=db.box.filter(b=>String(b.date).split('T')[0]===date);
+    donations=db.donations.filter(d=>String(d.date).split('T')[0]===date);
+    saaman=db.saaman.filter(s=>String(s.date).split('T')[0]===date);
+  }
+
+  document.getElementById('rpt-title').textContent=title;
+  const now=new Date();
+  document.getElementById('rpt-generated').textContent='Generated: '+formatDate(now.toISOString());
+  document.getElementById('rpt-gen-date').textContent=formatDate(now.toISOString());
+
+  // Fees
+  const feesTotal=fees.reduce((a,p)=>a+Number(p.amount||0),0);
+  document.getElementById('rpt-fees-body').innerHTML=fees.length?fees.map((p,i)=>{
+    const m=db.members.find(x=>String(x.id)===String(p.memberId));
+    return`<tr><td>${i+1}</td><td>${m?m.name:p.memberName||'—'}</td><td class="pos">Rs ${Number(p.amount||0).toLocaleString()}</td><td>${formatMonth(p.paidTo)}</td><td>${Number(p.fine||0)>0?'Rs '+Number(p.fine).toLocaleString():'—'}</td><td>${formatDate(p.date)}</td></tr>`;
+  }).join(''):'<tr><td colspan="6" class="empty">No fees collected</td></tr>';
+  document.getElementById('rpt-fees-total').textContent='Rs '+feesTotal.toLocaleString();
+
+  // Box
+  const boxTotal=box.reduce((a,b)=>a+Number(b.amount||0),0);
+  document.getElementById('rpt-box-body').innerHTML=box.length?box.map((b,i)=>`<tr><td>${i+1}</td><td>${formatDate(b.date)}</td><td class="pos">Rs ${Number(b.amount||0).toLocaleString()}</td><td>${b.by||'—'}</td><td style="color:#888">${b.notes||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No box entries</td></tr>';
+  document.getElementById('rpt-box-total').textContent='Rs '+boxTotal.toLocaleString();
+
+  // Donations
+  const donTotal=donations.reduce((a,d)=>a+Number(d.amount||0),0);
+  document.getElementById('rpt-don-body').innerHTML=donations.length?donations.map((d,i)=>`<tr><td>${i+1}</td><td>${formatDate(d.date)}</td><td>${d.donor||'Anonymous'}</td><td class="pos">Rs ${Number(d.amount||0).toLocaleString()}</td><td style="color:#888">${d.notes||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No donations</td></tr>';
+  document.getElementById('rpt-don-total').textContent='Rs '+donTotal.toLocaleString();
+
+  // Saaman
+  const saamTotal=saaman.reduce((a,s)=>a+Number(s.amount||0),0);
+  document.getElementById('rpt-saam-body').innerHTML=saaman.length?saaman.map((s,i)=>`<tr><td>${i+1}</td><td>${formatDate(s.date)}</td><td>${s.memberName||'—'}</td><td style="color:#888">${s.items||'—'}</td><td class="pos">Rs ${Number(s.amount||0).toLocaleString()}</td><td>${s.paid==='yes'?'<span class="badge badge-paid">Paid</span>':'<span class="badge badge-unpaid">Unpaid</span>'}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No saaman rentals</td></tr>';
+  document.getElementById('rpt-saam-total').textContent='Rs '+saamTotal.toLocaleString();
+
+  // Grand total
+  const grand=feesTotal+boxTotal+donTotal+saamTotal;
+  document.getElementById('rpt-grand-total').textContent='Rs '+grand.toLocaleString();
+
+  document.getElementById('report-output').style.display='block';
+  document.getElementById('report-content').scrollIntoView({behavior:'smooth'});
+}
+
+function printReport(){ window.print(); }
+
+async function downloadReport(){
+  const box=document.getElementById('report-content');
+  const title=document.getElementById('rpt-title').textContent||'report';
+  try {
+    document.getElementById('rpt-actions').style.display='none';
+    const canvas=await html2canvas(box,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
+    document.getElementById('rpt-actions').style.display='flex';
+    const imgData=canvas.toDataURL('image/png');
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pdfW=pdf.internal.pageSize.getWidth();
+    const pdfH=(canvas.height*pdfW)/canvas.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfW,pdfH);
+    pdf.save(title+'.pdf');
+  } catch(e){
+    document.getElementById('rpt-actions').style.display='flex';
+    alert('Could not generate PDF. Please use Print instead.');
+    console.error(e);
+  }
+}
+
 function renderAll(){
   renderStats(); renderMembers(); populateMemberSelects();
   renderPayments(); renderSaaman(); renderBox(); renderDonations(); renderUsers();
 }
 
 function switchTab(name,el){
-  ['members','payments','saaman','box','donations','users'].forEach(t=>{
+  ['members','payments','saaman','box','donations','reports','users'].forEach(t=>{
     const el2=document.getElementById('tab-'+t);
     if(el2) el2.style.display=t===name?'block':'none';
   });
