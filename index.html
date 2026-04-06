@@ -1030,9 +1030,29 @@ async function addSaaman(){
     const latest=await res.json();
     if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}
   } catch(e){ console.error(e); }
-  // Generate unique receipt number
-  db.receiptCounter=(parseInt(db.receiptCounter)||0)+1;
-  const receiptNo='RCP-'+String(db.receiptCounter).padStart(6,'0');
+  // Generate unique receipt number by reading latest from Google Sheets
+  let nextNo = 1;
+  try {
+    const rres=await fetch(SCRIPT_URL+'?action=read');
+    const rdata=await rres.json();
+    if(!rdata.error){
+      db.members=rdata.members||db.members;
+      db.payments=rdata.payments||db.payments;
+      db.saaman=rdata.saaman||db.saaman;
+      db.box=rdata.box||db.box;
+      db.donations=rdata.donations||db.donations;
+      db.users=rdata.users||db.users;
+      // Find highest receipt number across all saaman records
+      const nums=(rdata.saaman||[]).map(s=>{
+        if(!s.receiptNo) return 0;
+        const match=String(s.receiptNo).match(/(\d+)$/);
+        return match?parseInt(match[1]):0;
+      });
+      nextNo=Math.max(0,...nums)+1;
+    }
+  } catch(e){ console.error(e); nextNo=db.saaman.length+1; }
+  const receiptNo='RCP-'+String(nextNo).padStart(6,'0');
+  db.receiptCounter=nextNo;
   db.saaman.push({id:String(Date.now()),memberId:mid,memberName,isWalkin,date:document.getElementById('s-date').value,amount:String(total),items:itemsStr,paid:document.getElementById('s-paid').value,notes:document.getElementById('s-notes').value,receiptNo});
   await saveToSheet(); renderAll();
   // Reset form
