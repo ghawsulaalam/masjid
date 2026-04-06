@@ -435,6 +435,33 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- SAAMAN EDIT MODAL -->
+<div class="modal-overlay" id="saaman-edit-modal">
+  <div class="receipt-box" style="max-width:480px;">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Edit Saaman Entry</h3>
+    <input type="hidden" id="edit-saaman-id" />
+    <div class="form-row">
+      <div class="form-group"><label>Person name</label><input id="edit-saaman-name" /></div>
+      <div class="form-group"><label>Date</label><input id="edit-saaman-date" type="date" /></div>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;"><label>Items</label><input id="edit-saaman-items" /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Amount (Rs)</label><input id="edit-saaman-amount" type="number" /></div>
+      <div class="form-group"><label>Payment status</label>
+        <select id="edit-saaman-paid">
+          <option value="no">Not yet paid</option>
+          <option value="yes">Paid</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;"><label>Notes</label><input id="edit-saaman-notes" /></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn" onclick="closeSaamanEdit()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSaamanEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <!-- RECEIPT MODAL -->
@@ -934,7 +961,9 @@ function renderSaaman(){
     <td>${s.paid==='yes'?'<span class="badge badge-paid">Paid</span>':'<span class="badge badge-unpaid">Unpaid</span>'}</td>
     <td style="color:#888">${s.notes||''}</td>
     <td style="display:flex;gap:4px;flex-wrap:wrap">
+      ${can('write')?`<button class="btn btn-sm" onclick="editSaaman('${s.id}')">Edit</button>`:''}
       ${s.paid==='no'&&can('write')?`<button class="btn btn-sm" onclick="markSaamanPaid('${s.id}')">Mark paid</button>`:''}
+      ${s.paid==='yes'&&can('write')?`<button class="btn btn-sm" onclick="markSaamanUnpaid('${s.id}')">Mark unpaid</button>`:''}
       <button class="btn btn-sm" onclick="showReceipt('${s.id}')">&#128424; Receipt</button>
       ${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteSaaman('${s.id}')">Del</button>`:''}
     </td>
@@ -986,14 +1015,47 @@ async function addSaaman(){
 }
 async function markSaamanPaid(id){
   if(!can('write'))return;
-  try {
-    const res=await fetch(SCRIPT_URL+'?action=read');
-    const latest=await res.json();
-    if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}
-  } catch(e){ console.error(e); }
   const s=db.saaman.find(x=>String(x.id)===String(id));
-  if(s){ s.paid='yes'; await saveToSheet(); renderAll(); }
+  if(s){ s.paid='yes'; await saveToSheet(); }
   else { alert('Record not found. Please refresh and try again.'); }
+}
+
+async function markSaamanUnpaid(id){
+  if(!can('write'))return;
+  const s=db.saaman.find(x=>String(x.id)===String(id));
+  if(s){ s.paid='no'; await saveToSheet(); }
+  else { alert('Record not found. Please refresh and try again.'); }
+}
+
+function editSaaman(id){
+  const s=db.saaman.find(x=>String(x.id)===String(id));
+  if(!s) return;
+  document.getElementById('edit-saaman-id').value=id;
+  document.getElementById('edit-saaman-name').value=s.memberName||'';
+  document.getElementById('edit-saaman-date').value=String(s.date||'').split('T')[0];
+  document.getElementById('edit-saaman-items').value=s.items||'';
+  document.getElementById('edit-saaman-amount').value=s.amount||'';
+  document.getElementById('edit-saaman-paid').value=s.paid||'no';
+  document.getElementById('edit-saaman-notes').value=s.notes||'';
+  document.getElementById('saaman-edit-modal').classList.add('active');
+}
+
+function closeSaamanEdit(){
+  document.getElementById('saaman-edit-modal').classList.remove('active');
+}
+
+async function saveSaamanEdit(){
+  const id=document.getElementById('edit-saaman-id').value;
+  const s=db.saaman.find(x=>String(x.id)===String(id));
+  if(!s) return alert('Record not found');
+  s.memberName=document.getElementById('edit-saaman-name').value;
+  s.date=document.getElementById('edit-saaman-date').value;
+  s.items=document.getElementById('edit-saaman-items').value;
+  s.amount=document.getElementById('edit-saaman-amount').value;
+  s.paid=document.getElementById('edit-saaman-paid').value;
+  s.notes=document.getElementById('edit-saaman-notes').value;
+  closeSaamanEdit();
+  await saveToSheet();
 }
 
 function showReceipt(id){
