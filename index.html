@@ -4,6 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Masjid Ledger</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#1a1a1a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="apple-mobile-web-app-title" content="Masjid Ledger" />
+<link rel="apple-touch-icon" href="icon-192.png" />
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, sans-serif; background: #f5f5f5; color: #222; font-size: 14px; }
@@ -1746,7 +1752,15 @@ function switchTab(name,el){
 // ── Init ───────────────────────────────────────────────────────
 const saved=sessionLoad();
 if(saved){ currentUser=saved; showApp(); }
+
+// ── Register Service Worker (PWA) ──────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js')
+      .then(()=>console.log('PWA ready'))
+      .catch(e=>console.log('SW error:',e));
+  });
+}
 </script>
 </body>
 </html>
-
