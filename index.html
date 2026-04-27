@@ -1086,13 +1086,13 @@ async function addSaaman(){
   });
   if(itemsList.length===0) return alert('Please select at least one item');
   // Get unique receipt number from Supabase
-  let receiptNo='RCP-000001';
+  let receiptNo='SA-000001';
   try {
     const existing=await supaGet('saaman','?select=receipt_no&order=receipt_no.desc&limit=1');
     if(existing.length&&existing[0].receipt_no){
       const match=String(existing[0].receipt_no).match(/([0-9]+)$/);
       const next=match?parseInt(match[1])+1:1;
-      receiptNo='RCP-'+String(next).padStart(6,'0');
+      receiptNo='SA-'+String(next).padStart(6,'0');
     }
   } catch(e){ console.error(e); }
   try {
