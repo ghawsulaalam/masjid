@@ -7,87 +7,70 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, sans-serif; background: #f5f5f5; color: #222; font-size: 14px; }
-
-  /* ── LOGIN ── */
   #login-screen { display:flex; align-items:center; justify-content:center; min-height:100vh; background:#1a1a1a; }
   .login-box { background:#fff; border-radius:12px; padding:36px 32px; width:100%; max-width:360px; box-shadow:0 4px 24px rgba(0,0,0,0.3); }
-  .login-box h1 { font-size:20px; font-weight:700; margin-bottom:4px; color:#1a1a1a; }
+  .login-box h1 { font-size:20px; font-weight:700; margin-bottom:4px; }
   .login-box p { font-size:12px; color:#888; margin-bottom:24px; }
   .login-box .form-group { margin-bottom:14px; }
   .login-box label { font-size:12px; color:#555; font-weight:500; display:block; margin-bottom:4px; }
   .login-box input { width:100%; padding:9px 12px; font-size:14px; border:1px solid #ccc; border-radius:6px; }
-  .login-box input:focus { outline:none; border-color:#1a1a1a; }
   .login-box .btn-login { width:100%; padding:11px; background:#1a1a1a; color:#fff; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; margin-top:6px; }
-  .login-box .btn-login:hover { background:#333; }
   .login-err { color:#c0392b; font-size:12px; margin-top:8px; text-align:center; display:none; }
-
-  /* ── APP ── */
   #app-screen { display:none; }
-  .topbar { background:#1a1a1a; color:#fff; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
-  .topbar h1 { font-size:18px; font-weight:600; }
-  .topbar p { font-size:12px; color:#aaa; margin-top:2px; }
+  .topbar { background:#1a1a1a; color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  .topbar h1 { font-size:17px; font-weight:600; }
+  .topbar p { font-size:11px; color:#aaa; margin-top:2px; }
   .topbar-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   .user-badge { font-size:11px; background:#333; color:#fff; padding:4px 10px; border-radius:20px; }
   .conn { font-size:11px; padding:4px 12px; border-radius:20px; font-weight:600; }
-  .conn-ok   { background:#d4edda; color:#155724; }
-  .conn-err  { background:#f8d7da; color:#721c24; }
+  .conn-ok { background:#d4edda; color:#155724; }
+  .conn-err { background:#f8d7da; color:#721c24; }
   .conn-wait { background:#fff3cd; color:#856404; }
-  .btn { padding:8px 16px; font-size:13px; border-radius:6px; border:1px solid #ccc; cursor:pointer; background:#fff; color:#222; }
+  .btn { padding:7px 14px; font-size:12px; border-radius:6px; border:1px solid #ccc; cursor:pointer; background:#fff; color:#222; }
   .btn-primary { background:#1a1a1a; color:#fff; border-color:#1a1a1a; }
-  .btn-sm { padding:4px 10px; font-size:12px; }
+  .btn-sm { padding:3px 9px; font-size:11px; }
   .btn-danger { color:#c0392b; border-color:#e74c3c; background:#fff; }
   .btn:disabled { opacity:0.4; cursor:not-allowed; }
-  .readonly-badge { background:#fff3cd; color:#856404; font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; }
-  .container { max-width:1100px; margin:0 auto; padding:20px 16px; }
-  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
-  .stat { background:#fff; border-radius:8px; padding:14px; border:1px solid #e0e0e0; }
+  .container { max-width:1100px; margin:0 auto; padding:16px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; margin-bottom:18px; }
+  .stat { background:#fff; border-radius:8px; padding:12px; border:1px solid #e0e0e0; }
   .stat .label { font-size:11px; color:#777; margin-bottom:4px; }
-  .stat .value { font-size:20px; font-weight:600; }
-  .tabs { display:flex; gap:2px; border-bottom:2px solid #ddd; margin-bottom:20px; flex-wrap:wrap; }
-  .tab { padding:9px 16px; font-size:13px; cursor:pointer; border:none; background:none; color:#777; border-bottom:3px solid transparent; margin-bottom:-2px; }
+  .stat .value { font-size:18px; font-weight:600; }
+  .tabs { display:flex; gap:2px; border-bottom:2px solid #ddd; margin-bottom:18px; flex-wrap:wrap; }
+  .tab { padding:8px 14px; font-size:13px; cursor:pointer; border:none; background:none; color:#777; border-bottom:3px solid transparent; margin-bottom:-2px; }
   .tab.active { color:#1a1a1a; border-bottom:3px solid #1a1a1a; font-weight:600; }
-  .card { background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:18px; margin-bottom:16px; }
-  .card h3 { font-size:14px; font-weight:600; margin-bottom:14px; color:#333; }
-  .card p.sub { font-size:12px; color:#888; margin-bottom:12px; margin-top:-8px; }
-  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .card { background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:16px; margin-bottom:14px; }
+  .card h3 { font-size:14px; font-weight:600; margin-bottom:12px; color:#333; }
+  .card p.sub { font-size:12px; color:#888; margin-bottom:10px; margin-top:-6px; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
   .form-row.three { grid-template-columns:1fr 1fr 1fr; }
   .form-group { display:flex; flex-direction:column; gap:4px; }
   .form-group label { font-size:12px; color:#555; font-weight:500; }
-  input, select { width:100%; padding:8px 10px; font-size:13px; border:1px solid #ccc; border-radius:6px; background:#fff; color:#222; }
+  input, select { width:100%; padding:7px 9px; font-size:13px; border:1px solid #ccc; border-radius:6px; background:#fff; color:#222; }
   input:focus, select:focus { outline:none; border-color:#1a1a1a; }
   .flex-end { display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
-  .search-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
-  .search-row input { max-width:220px; }
+  .search-row { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
+  .search-row input { max-width:200px; }
   .table-wrap { overflow-x:auto; }
   table { width:100%; border-collapse:collapse; font-size:13px; }
-  th { text-align:left; padding:9px 10px; font-size:11px; font-weight:600; color:#666; border-bottom:1px solid #e0e0e0; white-space:nowrap; background:#fafafa; }
-  td { padding:10px 10px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+  th { text-align:left; padding:8px 9px; font-size:11px; font-weight:600; color:#666; border-bottom:1px solid #e0e0e0; white-space:nowrap; background:#fafafa; }
+  td { padding:9px 9px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
   tr:last-child td { border-bottom:none; }
   tr:hover td { background:#fafafa; }
-  .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
-  .badge-ok     { background:#d4edda; color:#155724; }
-  .badge-warn   { background:#fff3cd; color:#856404; }
-  .badge-late   { background:#f8d7da; color:#721c24; }
-  .badge-paid   { background:#d4edda; color:#155724; }
+  .badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:600; }
+  .badge-ok { background:#d4edda; color:#155724; }
+  .badge-warn { background:#fff3cd; color:#856404; }
+  .badge-late { background:#f8d7da; color:#721c24; }
+  .badge-paid { background:#d4edda; color:#155724; }
   .badge-unpaid { background:#f8d7da; color:#721c24; }
-  .badge-admin  { background:#d1ecf1; color:#0c5460; }
-  .badge-rw     { background:#d4edda; color:#155724; }
-  .badge-ro     { background:#e2e3e5; color:#383d41; }
   .empty { text-align:center; padding:2rem; color:#aaa; font-size:13px; }
   .pos { color:#27ae60; font-weight:500; }
   .neg { color:#e74c3c; font-weight:500; }
-  .modules-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-top:6px; }
-  .module-check { display:flex; align-items:center; gap:6px; font-size:13px; }
-  .module-check input[type=checkbox] { width:auto; }
-  @media(max-width:600px) {
-    .form-row,.form-row.three { grid-template-columns:1fr; }
-    .stats { grid-template-columns:1fr 1fr; }
-  }
   .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
   .modal-overlay.active { display:flex; }
   .receipt-box { background:#fff; border-radius:10px; padding:32px; width:100%; max-width:420px; margin:16px; }
   .receipt-header { text-align:center; margin-bottom:20px; border-bottom:2px solid #1a1a1a; padding-bottom:14px; }
-  .receipt-header h2 { font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:4px; }
+  .receipt-header h2 { font-size:15px; font-weight:700; margin-bottom:4px; }
   .receipt-header p { font-size:12px; color:#666; }
   .receipt-no { font-size:11px; color:#999; margin-top:4px; }
   .receipt-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:0.5px solid #f0f0f0; font-size:13px; }
@@ -98,6 +81,13 @@
   .receipt-status-paid { color:#155724; font-weight:700; }
   .receipt-status-unpaid { color:#721c24; font-weight:700; }
   .receipt-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+  .modules-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-top:6px; }
+  .module-check { display:flex; align-items:center; gap:6px; font-size:13px; }
+  .module-check input[type=checkbox] { width:auto; }
+  @media(max-width:600px) {
+    .form-row,.form-row.three { grid-template-columns:1fr; }
+    .stats { grid-template-columns:1fr 1fr; }
+  }
   @media print {
     body * { visibility:hidden; }
     .receipt-box, .receipt-box * { visibility:visible; }
@@ -111,11 +101,11 @@
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <h1>Masjid Ledger</h1>
-    <p>Sign in to continue</p>
+    <p>Sunnee Muslim Mosque And Madrassa</p>
     <div class="form-group"><label>Username</label><input id="login-user" placeholder="Username" autocomplete="username" /></div>
     <div class="form-group"><label>Password</label><input id="login-pass" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
     <button class="btn-login" onclick="doLogin()">Sign in</button>
@@ -123,44 +113,45 @@
   </div>
 </div>
 
-<!-- APP SCREEN -->
+<!-- APP -->
 <div id="app-screen">
   <div class="topbar">
     <div>
-      <h1>Masjid Ledger</h1>
+      <h1>&#x1F54C; Masjid Ledger</h1>
       <p>Fees &middot; Entry &middot; Saaman &middot; Masjid Box &middot; Donations</p>
     </div>
     <div class="topbar-right">
       <span class="user-badge" id="user-badge"></span>
       <span class="conn conn-wait" id="conn-status">Connecting...</span>
-      <button class="btn" onclick="loadFromSheet()" id="refresh-btn">&#8635; Refresh</button>
+      <button class="btn" onclick="loadData()" id="refresh-btn">&#8635; Refresh</button>
       <button class="btn btn-primary" onclick="exportCSV()">Export CSV</button>
       <button class="btn btn-danger" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
   <div class="container">
+    <!-- Stats filter -->
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+      <select id="stats-filter-type" onchange="onStatsFilterChange()" style="width:auto;padding:6px 10px;font-size:12px;">
+        <option value="month">Current month</option>
+        <option value="custom-month">Select month</option>
+        <option value="custom-year">Select year</option>
+        <option value="all">All time</option>
+      </select>
+      <input id="stats-filter-month" type="month" style="display:none;width:auto;padding:6px 10px;font-size:12px;" onchange="renderStats()" />
+      <select id="stats-filter-year" style="display:none;width:auto;padding:6px 10px;font-size:12px;" onchange="renderStats()"></select>
+      <span id="stats-filter-label" style="font-size:12px;color:#777;"></span>
+    </div>
+
     <div class="stats" id="stats"></div>
 
-    <!-- Stats filter -->
-  <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
-    <select id="stats-filter-type" onchange="onStatsFilterChange()" style="width:auto;padding:6px 10px;font-size:12px;">
-      <option value="month">Current month</option>
-      <option value="custom-month">Select month</option>
-      <option value="custom-year">Select year</option>
-      <option value="all">All time</option>
-    </select>
-    <input id="stats-filter-month" type="month" style="display:none;width:auto;padding:6px 10px;font-size:12px;" onchange="renderStats()" />
-    <select id="stats-filter-year" style="display:none;width:auto;padding:6px 10px;font-size:12px;" onchange="renderStats()"></select>
-    <span id="stats-filter-label" style="font-size:12px;color:#777;"></span>
-  </div>
-
-  <div class="tabs" id="tabs-bar">
+    <div class="tabs">
       <button class="tab active" data-tab="members" onclick="switchTab('members',this)">Members</button>
       <button class="tab" data-tab="payments" onclick="switchTab('payments',this)">Payments</button>
       <button class="tab" data-tab="saaman" onclick="switchTab('saaman',this)">Saaman</button>
       <button class="tab" data-tab="box" onclick="switchTab('box',this)">Masjid Box</button>
       <button class="tab" data-tab="donations" onclick="switchTab('donations',this)">Donations</button>
+      <button class="tab" data-tab="zakaat" onclick="switchTab('zakaat',this)">Zakaat</button>
       <button class="tab" data-tab="reports" onclick="switchTab('reports',this)">Reports</button>
       <button class="tab" data-tab="users" onclick="switchTab('users',this)" id="tab-users-btn">Users</button>
     </div>
@@ -170,7 +161,7 @@
       <div class="card" id="member-form-card">
         <h3>Add Member</h3>
         <div class="form-row">
-          <div class="form-group"><label>Full name</label><input id="m-name" placeholder="e.g. Boodhun Iqbal" /></div>
+          <div class="form-group"><label>Full name</label><input id="m-name" placeholder="Full name" /></div>
           <div class="form-group"><label>Annual fee (Rs) <span style="color:#aaa;font-weight:400">(optional)</span></label><input id="m-fee" type="number" placeholder="1200" /></div>
         </div>
         <div class="form-row three">
@@ -189,9 +180,18 @@
           <option value="warn">Due soon</option>
           <option value="late">Non member</option>
         </select>
+        <select id="members-sort" onchange="renderMembers()" style="width:auto;padding:7px 9px;font-size:13px;">
+          <option value="name">Sort: Name (A-Z)</option>
+          <option value="name-desc">Sort: Name (Z-A)</option>
+          <option value="paidto">Sort: Paid to (oldest)</option>
+          <option value="paidto-desc">Sort: Paid to (newest)</option>
+          <option value="status">Sort: Status</option>
+        </select>
+        <button class="btn" onclick="printMembersList()">&#128424; Print</button>
+        <button class="btn btn-primary" onclick="downloadMembersPDF()">&#11015; PDF</button>
       </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>#</th><th>Name</th><th>Fee/yr</th><th>Paid up to</th><th>Status</th><th>Entry fee</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>#</th><th>Name</th><th>Paid up to</th><th>Status</th><th>Entry fee</th><th>Notes</th><th></th></tr></thead>
         <tbody id="members-tbody"></tbody>
       </table></div>
     </div>
@@ -302,30 +302,79 @@
       </table></div>
     </div>
 
+    <!-- ZAKAAT -->
+    <div id="tab-zakaat" style="display:none">
+      <div class="card" id="zakaat-form-card">
+        <h3>Record Zakaat</h3>
+        <div class="form-row three">
+          <div class="form-group"><label>Date</label><input id="z-date" type="date" /></div>
+          <div class="form-group"><label>Donor name</label><input id="z-name" placeholder="Name or Anonymous" /></div>
+          <div class="form-group"><label>Amount (Rs)</label><input id="z-amount" type="number" placeholder="0" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Payment method</label>
+            <select id="z-method">
+              <option value="Cash">Cash</option>
+              <option value="Bank transfer">Bank transfer</option>
+              <option value="Cheque">Cheque</option>
+              <option value="Juice">Juice</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Collected by <span style="color:#e74c3c">*</span></label><input id="z-collected" placeholder="Name" /></div>
+        </div>
+        <div class="form-row"><div class="form-group"><label>Notes</label><input id="z-notes" placeholder="Optional" /></div></div>
+        <div class="flex-end"><button class="btn btn-primary" onclick="addZakaat()">Record Zakaat</button></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Donor</th><th>Amount</th><th>Payment method</th><th>Collected by</th><th>Receipt #</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="zakaat-tbody"></tbody>
+      </table></div>
+      <!-- Zakaat Expenses -->
+      <div class="card" id="zakaat-exp-form-card" style="margin-top:14px;">
+        <h3>Record Zakaat Expense</h3>
+        <div class="form-row three">
+          <div class="form-group"><label>Date</label><input id="ze-date" type="date" /></div>
+          <div class="form-group"><label>Description <span style="color:#e74c3c">*</span></label><input id="ze-desc" placeholder="e.g. Food for poor family" /></div>
+          <div class="form-group"><label>Amount (Rs) <span style="color:#e74c3c">*</span></label><input id="ze-amount" type="number" placeholder="0" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Paid to</label><input id="ze-paidto" placeholder="Name or organisation" /></div>
+          <div class="form-group"><label>Notes</label><input id="ze-notes" placeholder="Optional" /></div>
+        </div>
+        <div class="flex-end"><button class="btn btn-danger" onclick="addZakaatExpense()">Record Expense</button></div>
+      </div>
+      <h3 style="font-size:13px;font-weight:600;margin:16px 0 8px;color:#e74c3c;">Zakaat Expenses</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Paid to</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="zakaat-exp-tbody"></tbody>
+      </table></div>
+    </div>
+
     <!-- REPORTS -->
     <div id="tab-reports" style="display:none">
       <div class="card">
         <h3>Generate Report</h3>
         <div class="form-row">
-          <div class="form-group">
-            <label>Report type</label>
-            <select id="rpt-type" onchange="toggleReportType()">
+          <div class="form-group"><label>Report type</label>
+            <select id="rpt-type">
               <option value="monthly">Monthly collection report</option>
-              <option value="session">Saturday session report</option>
             </select>
           </div>
-          <div class="form-group" id="rpt-month-group">
-            <label>Select month</label>
-            <input id="rpt-month" type="month" />
-          </div>
-          <div class="form-group" id="rpt-date-group" style="display:none">
-            <label>Select date</label>
-            <input id="rpt-date" type="date" />
+          <div class="form-group"><label>Select month</label><input id="rpt-month" type="month" /></div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:12px;color:#555;font-weight:500;margin-bottom:6px;display:block;">Include modules</label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+            <label class="module-check"><input type="checkbox" id="rpt-mod-all" checked onchange="toggleAllReportModules(this)" /> <strong>All</strong></label>
+            <label class="module-check"><input type="checkbox" id="rpt-mod-fees" checked onchange="syncAllCheckbox()" /> Fees</label>
+            <label class="module-check"><input type="checkbox" id="rpt-mod-box" checked onchange="syncAllCheckbox()" /> Masjid Box</label>
+            <label class="module-check"><input type="checkbox" id="rpt-mod-donations" checked onchange="syncAllCheckbox()" /> Donations</label>
+            <label class="module-check"><input type="checkbox" id="rpt-mod-saaman" checked onchange="syncAllCheckbox()" /> Saaman</label>
+            <label class="module-check"><input type="checkbox" id="rpt-mod-zakaat" checked onchange="syncAllCheckbox()" /> Zakaat</label>
           </div>
         </div>
-        <div class="flex-end">
-          <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
-        </div>
+        <div class="flex-end"><button class="btn btn-primary" onclick="generateReport()">Generate Report</button></div>
       </div>
       <div id="report-output" style="display:none">
         <div class="card" id="report-content">
@@ -334,64 +383,56 @@
             <p style="font-size:13px;color:#666;" id="rpt-title"></p>
             <p style="font-size:11px;color:#999;" id="rpt-generated"></p>
           </div>
-
-          <!-- Fees section -->
-          <div style="margin-bottom:20px;">
+          <div id="rpt-section-fees" style="margin-bottom:20px;">
             <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">MEMBERSHIP FEES</h3>
             <div class="table-wrap"><table>
               <thead><tr><th>#</th><th>Member</th><th>Amount</th><th>Paid to</th><th>Fine</th><th>Date</th></tr></thead>
               <tbody id="rpt-fees-body"></tbody>
             </table></div>
-            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">
-              Total fees: <span id="rpt-fees-total" style="margin-left:12px;color:#27ae60;"></span>
-            </div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">Total fees: <span id="rpt-fees-total" style="margin-left:12px;color:#27ae60;"></span></div>
           </div>
-
-          <!-- Masjid Box section -->
-          <div style="margin-bottom:20px;">
+          <div id="rpt-section-box" style="margin-bottom:20px;">
             <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">MASJID BOX</h3>
             <div class="table-wrap"><table>
               <thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Collected by</th><th>Notes</th></tr></thead>
               <tbody id="rpt-box-body"></tbody>
             </table></div>
-            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">
-              Total box: <span id="rpt-box-total" style="margin-left:12px;color:#27ae60;"></span>
-            </div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">Total box: <span id="rpt-box-total" style="margin-left:12px;color:#27ae60;"></span></div>
           </div>
-
-          <!-- Donations section -->
-          <div style="margin-bottom:20px;">
+          <div id="rpt-section-donations" style="margin-bottom:20px;">
             <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">DONATIONS</h3>
             <div class="table-wrap"><table>
               <thead><tr><th>#</th><th>Date</th><th>Donor</th><th>Amount</th><th>Notes</th></tr></thead>
               <tbody id="rpt-don-body"></tbody>
             </table></div>
-            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">
-              Total donations: <span id="rpt-don-total" style="margin-left:12px;color:#27ae60;"></span>
-            </div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">Total donations: <span id="rpt-don-total" style="margin-left:12px;color:#27ae60;"></span></div>
           </div>
-
-          <!-- Saaman section -->
-          <div style="margin-bottom:20px;">
+          <div id="rpt-section-saaman" style="margin-bottom:20px;">
             <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">SAAMAN RENTALS</h3>
             <div class="table-wrap"><table>
               <thead><tr><th>#</th><th>Date</th><th>Person</th><th>Items</th><th>Amount</th><th>Status</th></tr></thead>
               <tbody id="rpt-saam-body"></tbody>
             </table></div>
-            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">
-              Total saaman: <span id="rpt-saam-total" style="margin-left:12px;color:#27ae60;"></span>
-            </div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">Total saaman: <span id="rpt-saam-total" style="margin-left:12px;color:#27ae60;"></span></div>
           </div>
-
-          <!-- Grand total -->
+          <div id="rpt-section-zakaat" style="margin-bottom:20px;">
+            <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;padding:6px 10px;background:#f5f5f5;border-radius:6px;">ZAKAAT</h3>
+            <div class="table-wrap"><table>
+              <thead><tr><th>#</th><th>Date</th><th>Donor</th><th>Amount</th><th>Payment method</th><th>Collected by</th></tr></thead>
+              <tbody id="rpt-zakaat-body"></tbody>
+            </table></div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">Total zakaat: <span id="rpt-zakaat-total" style="margin-left:12px;color:#27ae60;"></span></div>
+            <div class="table-wrap" style="margin-top:10px;"><table>
+              <thead><tr><th>#</th><th>Date</th><th>Description</th><th>Amount</th><th>Paid to</th></tr></thead>
+              <tbody id="rpt-zakaat-exp-body"></tbody>
+            </table></div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">Total zakaat expenses: <span id="rpt-zakaat-exp-total" style="margin-left:12px;color:#e74c3c;"></span></div>
+            <div style="display:flex;justify-content:flex-end;padding:8px 0;font-weight:700;font-size:13px;">Zakaat balance: <span id="rpt-zakaat-balance" style="margin-left:12px;"></span></div>
+          </div>
           <div style="background:#1a1a1a;color:#fff;padding:14px 16px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:700;">
-            <span>GRAND TOTAL</span>
-            <span id="rpt-grand-total"></span>
+            <span>GRAND TOTAL</span><span id="rpt-grand-total"></span>
           </div>
-
-          <div style="text-align:center;font-size:11px;color:#999;margin-top:16px;">
-            Generated on <span id="rpt-gen-date"></span> &mdash; Sunnee Muslim Mosque And Madrassa
-          </div>
+          <div style="text-align:center;font-size:11px;color:#999;margin-top:16px;">Generated on <span id="rpt-gen-date"></span> &mdash; Sunnee Muslim Mosque And Madrassa</div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;" id="rpt-actions">
           <button class="btn" onclick="printReport()">&#128424; Print</button>
@@ -400,7 +441,7 @@
       </div>
     </div>
 
-    <!-- USERS (admin only) -->
+    <!-- USERS -->
     <div id="tab-users" style="display:none">
       <div class="card">
         <h3>Create User</h3>
@@ -408,10 +449,7 @@
           <div class="form-group"><label>Username</label><input id="u-name" placeholder="e.g. ahmed" /></div>
           <div class="form-group"><label>Password</label><input id="u-pass" type="password" placeholder="Password" /></div>
           <div class="form-group"><label>Access level</label>
-            <select id="u-access">
-              <option value="rw">Read &amp; Write</option>
-              <option value="ro">Read Only</option>
-            </select>
+            <select id="u-access"><option value="rw">Read &amp; Write</option><option value="ro">Read Only</option></select>
           </div>
         </div>
         <div class="form-group" style="margin-bottom:10px"><label>Module access</label>
@@ -421,6 +459,7 @@
             <label class="module-check"><input type="checkbox" id="u-mod-saaman" checked /> Saaman</label>
             <label class="module-check"><input type="checkbox" id="u-mod-box" checked /> Masjid Box</label>
             <label class="module-check"><input type="checkbox" id="u-mod-donations" checked /> Donations</label>
+            <label class="module-check"><input type="checkbox" id="u-mod-zakaat" checked /> Zakaat</label>
           </div>
         </div>
         <div class="flex-end"><button class="btn btn-primary" onclick="addUser()">Create User</button></div>
@@ -430,11 +469,30 @@
         <tbody id="users-tbody"></tbody>
       </table></div>
     </div>
-
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- MEMBER EDIT MODAL -->
+<div class="modal-overlay" id="member-edit-modal">
+  <div class="receipt-box" style="max-width:500px;">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Edit Member</h3>
+    <input type="hidden" id="edit-member-id" />
+    <div class="form-row">
+      <div class="form-group"><label>Full name</label><input id="edit-member-name" /></div>
+      <div class="form-group"><label>Annual fee (Rs)</label><input id="edit-member-fee" type="number" placeholder="0" /></div>
+    </div>
+    <div class="form-row three">
+      <div class="form-group"><label>Date joined <span style="color:#aaa;font-weight:400">(optional)</span></label><input id="edit-member-date" type="date" /></div>
+      <div class="form-group"><label>Paid up to <span style="color:#e74c3c">*</span></label><input id="edit-member-paidto" type="month" /></div>
+      <div class="form-group"><label>Entry fee (Rs)</label><input id="edit-member-entry" type="number" placeholder="0" /></div>
+    </div>
+    <div class="form-row"><div class="form-group"><label>Notes</label><input id="edit-member-notes" placeholder="Optional" /></div></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+      <button class="btn" onclick="closeMemberEdit()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMemberEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
 
 <!-- SAAMAN EDIT MODAL -->
 <div class="modal-overlay" id="saaman-edit-modal">
@@ -449,10 +507,7 @@
     <div class="form-row">
       <div class="form-group"><label>Amount (Rs)</label><input id="edit-saaman-amount" type="number" /></div>
       <div class="form-group"><label>Payment status</label>
-        <select id="edit-saaman-paid">
-          <option value="no">Not yet paid</option>
-          <option value="yes">Paid</option>
-        </select>
+        <select id="edit-saaman-paid"><option value="no">Not yet paid</option><option value="yes">Paid</option></select>
       </div>
     </div>
     <div class="form-group" style="margin-bottom:16px;"><label>Notes</label><input id="edit-saaman-notes" /></div>
@@ -462,7 +517,6 @@
     </div>
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <!-- RECEIPT MODAL -->
 <div class="modal-overlay" id="receipt-modal">
@@ -488,42 +542,84 @@
   </div>
 </div>
 
+<!-- ZAKAAT RECEIPT MODAL -->
+<div class="modal-overlay" id="zakaat-receipt-modal">
+  <div class="receipt-box" id="zakaat-receipt-content">
+    <div class="receipt-header">
+      <h2>Sunnee Muslim Mosque And Madrassa</h2>
+      <p>Zakaat Receipt</p>
+      <div class="receipt-no" id="zr-no"></div>
+    </div>
+    <div class="receipt-row"><span class="label">Date</span><span class="value" id="zr-date"></span></div>
+    <div class="receipt-row"><span class="label">Donor</span><span class="value" id="zr-name"></span></div>
+    <div class="receipt-row"><span class="label">Payment method</span><span class="value" id="zr-method"></span></div>
+    <div class="receipt-row"><span class="label">Collected by</span><span class="value" id="zr-collected"></span></div>
+    <div class="receipt-row"><span class="label">Notes</span><span class="value" id="zr-notes"></span></div>
+    <div class="receipt-total"><span>Amount</span><span id="zr-amount"></span></div>
+    <div class="receipt-footer">Jazakallahu Khayran &mdash; Sunnee Muslim Mosque And Madrassa</div>
+    <div class="receipt-actions">
+      <button class="btn" onclick="printZakaatReceipt()">&#128424; Print</button>
+      <button class="btn btn-primary" onclick="downloadZakaatReceipt()">&#11015; Download PDF</button>
+      <button class="btn" onclick="closeZakaatReceipt()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbya_E3sTPHgodzo3j4edS5rn2nltTeNldjEuYNlGWOArodMTHcdmdoxanyqCoQ1YSST8g/exec';
+// ── Supabase config ────────────────────────────────────────────
+const SUPA_URL = 'https://fgsuunczokcbaackzwki.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnc3V1bmN6b2tjYmFhY2t6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMzMwMzAsImV4cCI6MjA5MjcwOTAzMH0.ejlxFtxlPZet1L5gQiqIes1G9x5w0-O6ecCfU7J-jqo';
 
-// ── Saaman price list ─────────────────────────────────────────
-const SAAMAN_ITEMS = [
-  {name:'Bin',              member:30,  nonmember:50},
-  {name:'Calchoul',         member:15,  nonmember:25},
-  {name:'Caraille',         member:75,  nonmember:100},
-  {name:'Chaise',           member:5,   nonmember:10},
-  {name:'Degue cuivre 175 personnes', member:225, nonmember:null},
-  {name:'Degue cuivre 150 personnes', member:200, nonmember:null},
-  {name:'Degue cuivre 125 personnes', member:150, nonmember:null},
-  {name:'Degue 300 personnes',  member:250, nonmember:350},
-  {name:'Degue 200 personnes',  member:200, nonmember:300},
-  {name:'Degue 150 personnes',  member:150, nonmember:250},
-  {name:'Degue 125 personnes',  member:125, nonmember:225},
-  {name:'Degue 25-100 personnes', member:100, nonmember:150},
-  {name:'Deksi',            member:75,  nonmember:100},
-  {name:'Jarna casse manger', member:50, nonmember:75},
-  {name:'Jarna metallic',   member:25,  nonmember:35},
-  {name:'La table',         member:50,  nonmember:75},
-  {name:'Levieu',           member:100, nonmember:150},
-  {name:'Natte Petit',      member:15,  nonmember:25},
-  {name:'Natte Gros',       member:20,  nonmember:30},
-  {name:'Plat',             member:3,   nonmember:5},
-  {name:'Plat melamine',    member:3,   nonmember:5},
-  {name:'Senie casse manger', member:50, nonmember:75},
-  {name:'Senie Petit',      member:20,  nonmember:30},
-  {name:'Soucoupe',         member:3,   nonmember:5},
-  {name:'Tawa',             member:100, nonmember:125},
-  {name:'Verre',            member:2,   nonmember:3},
-];
-
-// ── Built-in admin (never deletable) ──────────────────────────
 const ADMIN = { username:'admin', password:'Ghawsul@@lam!', role:'admin', modules:['members','payments','saaman','box','donations'] };
 
+const SAAMAN_ITEMS = [
+  {name:'Bin',member:30,nonmember:50},{name:'Calchoul',member:15,nonmember:25},
+  {name:'Caraille',member:75,nonmember:100},{name:'Chaise',member:5,nonmember:10},
+  {name:'Degue cuivre 175 personnes',member:225,nonmember:null},
+  {name:'Degue cuivre 150 personnes',member:200,nonmember:null},
+  {name:'Degue cuivre 125 personnes',member:150,nonmember:null},
+  {name:'Degue 300 personnes',member:250,nonmember:350},{name:'Degue 200 personnes',member:200,nonmember:300},
+  {name:'Degue 150 personnes',member:150,nonmember:250},{name:'Degue 125 personnes',member:125,nonmember:225},
+  {name:'Degue 25-100 personnes',member:100,nonmember:150},{name:'Deksi',member:75,nonmember:100},
+  {name:'Jarna casse manger',member:50,nonmember:75},{name:'Jarna metallic',member:25,nonmember:35},
+  {name:'La table',member:50,nonmember:75},{name:'Levieu',member:100,nonmember:150},
+  {name:'Natte Petit',member:15,nonmember:25},{name:'Natte Gros',member:20,nonmember:30},
+  {name:'Plat',member:3,nonmember:5},{name:'Plat melamine',member:3,nonmember:5},
+  {name:'Senie casse manger',member:50,nonmember:75},{name:'Senie Petit',member:20,nonmember:30},
+  {name:'Soucoupe',member:3,nonmember:5},{name:'Tawa',member:100,nonmember:125},{name:'Verre',member:2,nonmember:3},
+];
+
+let db = { members:[], payments:[], saaman:[], box:[], donations:[], zakaat:[], zakaat_expenses:[], users:[] };
+let currentUser = null;
+
+// ── Supabase API ───────────────────────────────────────────────
+async function supa(method, table, body=null, filters='') {
+  const url = `${SUPA_URL}/rest/v1/${table}${filters}`;
+  const opts = {
+    method,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method==='POST'?'return=representation':'return=representation',
+      'Range': '0-9999'
+    }
+  };
+  if(body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if(!res.ok) { const err=await res.text(); throw new Error(err); }
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+async function supaGet(table, filters='') { return supa('GET', table, null, filters); }
+async function supaPost(table, body) { return supa('POST', table, body); }
+async function supaPatch(table, body, filters) { return supa('PATCH', table, body, filters); }
+async function supaDelete(table, filters) { return supa('DELETE', table, null, filters); }
+
+// ── Date helpers ───────────────────────────────────────────────
 function getLocalDate(){
   const d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -532,54 +628,50 @@ function getLocalMonth(){
   const d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
 }
+function formatDate(val){
+  if(!val||val==='—') return '—';
+  const s=String(val).split('T')[0];
+  const parts=s.split('-');
+  if(parts.length<3) return s;
+  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const m=parseInt(parts[1])-1;
+  if(m<0||m>11) return s;
+  return parts[2]+'/'+months[m]+'/'+parts[0];
+}
+function formatMonth(val){
+  if(!val) return '—';
+  const s=String(val).split('T')[0];
+  const parts=s.split('-');
+  if(parts.length>=2){
+    const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const m=parseInt(parts[1])-1;
+    if(m>=0&&m<12) return months[m]+' '+parts[0];
+  }
+  return val;
+}
+
 const today = getLocalDate();
 const thisMonth = getLocalMonth();
 
-let db = { members:[], payments:[], saaman:[], box:[], donations:[], users:[], receiptCounter:0 };
-let currentUser = null;
-
-// ── SESSION ───────────────────────────────────────────────────
-function sessionSave(u){ sessionStorage.setItem('msjd_user', JSON.stringify(u)); }
+// ── Session ────────────────────────────────────────────────────
+function sessionSave(u){ sessionStorage.setItem('msjd_user',JSON.stringify(u)); }
 function sessionLoad(){ const r=sessionStorage.getItem('msjd_user'); return r?JSON.parse(r):null; }
 function sessionClear(){ sessionStorage.removeItem('msjd_user'); }
 
-// ── LOGIN ─────────────────────────────────────────────────────
-function doLogin(){
+// ── Login ──────────────────────────────────────────────────────
+async function doLogin(){
   const u=document.getElementById('login-user').value.trim();
   const p=document.getElementById('login-pass').value;
   document.getElementById('login-err').style.display='none';
-
-  // Check admin
-  if(u===ADMIN.username && p===ADMIN.password){
-    currentUser={...ADMIN};
-    sessionSave(currentUser);
-    showApp();
-    return;
-  }
-  // Check other users
-  const found = db.users.find(x=>x.username===u && x.password===p);
-  if(found){
-    currentUser={...found};
-    sessionSave(currentUser);
-    showApp();
-    return;
-  }
-  // Try loading from sheet first then recheck
-  loadAndCheckLogin(u,p);
-}
-
-async function loadAndCheckLogin(u,p){
+  if(u===ADMIN.username&&p===ADMIN.password){ currentUser={...ADMIN}; sessionSave(currentUser); showApp(); return; }
   try {
-    const res=await fetch(SCRIPT_URL+'?action=read');
-    const data=await res.json();
-    db.users=data.users||[];
-    const found=db.users.find(x=>x.username===u&&x.password===p);
-    if(found){ currentUser={...found}; sessionSave(currentUser); showApp(); }
-    else { document.getElementById('login-err').style.display='block'; }
-  } catch(e){
-    // If no internet, only allow admin login
-    document.getElementById('login-err').style.display='block';
-  }
+    const users=await supaGet('users','?username=eq.'+encodeURIComponent(u));
+    const found=users.find(x=>x.password===p);
+    if(found){
+      currentUser={...found, modules:Array.isArray(found.modules)?found.modules:String(found.modules||'').split(','), role:'user'};
+      sessionSave(currentUser); showApp();
+    } else { document.getElementById('login-err').style.display='block'; }
+  } catch(e){ document.getElementById('login-err').style.display='block'; console.error(e); }
 }
 
 function doLogout(){
@@ -593,166 +685,97 @@ function doLogout(){
 function showApp(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app-screen').style.display='block';
-  applyPermissions();
-  setDateDefaults();
-  loadFromSheet();
+  applyPermissions(); setDateDefaults(); loadData();
 }
 
-// ── PERMISSIONS ───────────────────────────────────────────────
+// ── Permissions ────────────────────────────────────────────────
 function can(action){ return currentUser.role==='admin'||(action==='write'?currentUser.access==='rw':true); }
-function canModule(mod){ return currentUser.role==='admin'||currentUser.modules.includes(mod); }
+function canModule(mod){ return currentUser.role==='admin'||(currentUser.modules||[]).includes(mod); }
 
 function applyPermissions(){
   const u=currentUser;
-  // User badge
   document.getElementById('user-badge').textContent=u.username+(u.role==='admin'?' (Admin)':u.access==='ro'?' (Read only)':'');
-  // Show/hide tabs
-  ['members','payments','saaman','box','donations'].forEach(mod=>{
+  ['members','payments','saaman','box','donations','zakaat'].forEach(mod=>{
     const btn=document.querySelector(`.tab[data-tab="${mod}"]`);
     if(btn) btn.style.display=canModule(mod)?'':'none';
   });
-  // Users tab — admin only
   document.getElementById('tab-users-btn').style.display=u.role==='admin'?'':'none';
-  // Hide add forms if read only
-  ['member-form-card','payment-form-card','saaman-form-card','box-form-card','donations-form-card'].forEach(id=>{
+  ['member-form-card','payment-form-card','saaman-form-card','box-form-card','donations-form-card','zakaat-form-card','zakaat-exp-form-card'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display=can('write')?'':'none';
   });
-  // Switch to first allowed tab
-  const firstAllowed=['members','payments','saaman','box','donations'].find(m=>canModule(m));
+  const firstAllowed=['members','payments','saaman','box','donations','zakaat'].find(m=>canModule(m));
   if(firstAllowed){ const btn=document.querySelector(`.tab[data-tab="${firstAllowed}"]`); if(btn) switchTab(firstAllowed,btn); }
 }
 
 function setDateDefaults(){
-  ['m-date','p-date','s-date','b-date','d-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});
+  ['m-date','p-date','s-date','b-date','d-date','z-date','ze-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});
   ['m-paid','p-paidto'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=thisMonth;});
 }
 
-// ── GOOGLE SHEETS ─────────────────────────────────────────────
+// ── Load data ──────────────────────────────────────────────────
 function setConn(state,msg){
   const el=document.getElementById('conn-status');
-  el.className='conn '+(state==='ok'?'conn-ok':state==='err'?'conn-err':'conn-wait');
+  el.className='conn conn-'+(state==='ok'?'ok':state==='err'?'err':'wait');
   el.textContent=msg;
 }
 
-async function loadFromSheet(){
+async function loadData(){
   setConn('wait','Connecting...');
   document.getElementById('refresh-btn').disabled=true;
   try {
-    const res=await fetch(SCRIPT_URL+'?action=read');
-    const data=await res.json();
-    if(data.error) throw new Error(data.error);
-    db.members   = data.members   || [];
-    db.payments  = data.payments  || [];
-    db.saaman    = data.saaman    || [];
-    db.box       = data.box       || [];
-    db.donations = data.donations || [];
-    db.users     = data.users     || [];
-    setConn('ok','Connected to Google Sheets');
+    const [members,payments,saaman,box,donations,zakaat,zakaat_expenses,users] = await Promise.all([
+      supaGet('members','?order=name.asc&limit=1000'),
+      supaGet('payments','?order=date.desc&limit=5000'),
+      supaGet('saaman','?order=date.desc&limit=5000'),
+      supaGet('box','?order=date.desc&limit=5000'),
+      supaGet('donations','?order=date.desc&limit=5000'),
+      supaGet('zakaat','?order=date.desc&limit=5000'),
+      supaGet('zakaat_expenses','?order=date.desc&limit=5000'),
+      supaGet('users','?order=username.asc'),
+    ]);
+    db.members=members; db.payments=payments; db.saaman=saaman;
+    db.box=box; db.donations=donations; db.zakaat=zakaat; db.zakaat_expenses=zakaat_expenses; db.users=users;
+    setConn('ok','Connected to Supabase');
     renderAll();
-  } catch(err){
-    setConn('err','Connection failed');
-    console.error(err);
-  }
+  } catch(e){ setConn('err','Connection failed'); console.error(e); }
   document.getElementById('refresh-btn').disabled=false;
 }
 
-async function saveToSheet(){
-  // Render immediately so user sees the change right away
-  renderAll();
-  // Then save to Google Sheets in the background
-  try {
-    await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'write',payload:db})});
-  } catch(e){ console.error('Save error',e); }
-}
-
-// ── HELPERS ───────────────────────────────────────────────────
-function formatMonth(val){
-  if(!val||val==='0') return '—';
-  const ymd=parseToYMD(val);
-  if(!ymd) return '—';
-  const parts=ymd.split('-');
-  if(parts.length>=2){
-    const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-    const m=parseInt(parts[1])-1;
-    if(m>=0&&m<12) return months[m]+' '+parts[0];
-  }
-  return val;
-}
-
-function parseToYMD(val){
-  if(!val) return null;
-  const s=String(val).trim();
-  if(!s||s==='—'||s==='0') return null;
-  // Already YYYY-MM-DD or YYYY-MM
-  if(/^\d{4}-\d{2}(-\d{2})?/.test(s)) return s.split('T')[0];
-  // Try parsing as Date (handles "Mon Apr 6 2026", full ISO strings etc)
-  const d=new Date(s);
-  if(!isNaN(d)){
-    const y=d.getFullYear();
-    const m=String(d.getMonth()+1).padStart(2,'0');
-    const dd=String(d.getDate()).padStart(2,'0');
-    return y+'-'+m+'-'+dd;
-  }
-  return s;
-}
-
-function formatDate(val){
-  if(!val||val==='0') return '—';
-  const ymd=parseToYMD(val);
-  if(!ymd) return '—';
-  const parts=ymd.split('-');
-  if(parts.length<3) return ymd;
-  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  const m=parseInt(parts[1])-1;
-  if(m<0||m>11) return ymd;
-  return parts[2]+'/'+months[m]+'/'+parts[0];
-}
-
+// ── Member status ──────────────────────────────────────────────
 function memberStatus(m){
   const now=new Date();const y=now.getFullYear();const mo=now.getMonth()+1;
   const cur=y+'-'+String(mo).padStart(2,'0');
-  if(!m.paidTo||m.paidTo==='0') return 'late';
-  const ymd=parseToYMD(m.paidTo)||'';
-  const parts=ymd.split('-');
-  if(parts.length<2) return 'late';
+  if(!m.paid_to) return 'late';
+  const raw=String(m.paid_to).split('T')[0];
+  const parts=raw.split('-');
   const paidStr=parts[0]+'-'+parts[1];
   if(paidStr>=cur) return 'ok';
-  const py=parseInt(parts[0]); const pm=parseInt(parts[1]);
-  const monthsBehind=(y-py)*12+(mo-pm);
-  return monthsBehind<=2?'warn':'late';
+  const py=parseInt(parts[0]);const pm=parseInt(parts[1]);
+  const behind=(y-py)*12+(mo-pm);
+  return behind<=2?'warn':'late';
 }
 function statusBadge(s){
-  if(s==='ok')   return '<span class="badge badge-ok">Member</span>';
+  if(s==='ok') return '<span class="badge badge-ok">Member</span>';
   if(s==='warn') return '<span class="badge badge-warn">Due soon</span>';
   return '<span class="badge badge-late">Non member</span>';
 }
 
-// ── RENDER ────────────────────────────────────────────────────
+// ── Stats ──────────────────────────────────────────────────────
 function getStatsFilter(){
   const type=document.getElementById('stats-filter-type')?document.getElementById('stats-filter-type').value:'month';
   const now=new Date();
-  const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'); // local
+  const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const curYear=String(now.getFullYear());
   let prefix='',label='';
-  if(type==='month'){
-    prefix=curMonth;
-    const mn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][now.getMonth()];
-    label=mn+' '+now.getFullYear();
-  } else if(type==='custom-month'){
-    prefix=document.getElementById('stats-filter-month').value||curMonth;
-    const[y,m]=prefix.split('-');
-    const mn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][parseInt(m)-1];
-    label=mn+' '+y;
-  } else if(type==='custom-year'){
-    prefix=document.getElementById('stats-filter-year').value||curYear;
-    label=prefix;
-  } else { prefix=''; label='All time'; }
+  if(type==='month'){ prefix=curMonth; const mn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][now.getMonth()]; label=mn+' '+now.getFullYear(); }
+  else if(type==='custom-month'){ prefix=document.getElementById('stats-filter-month').value||curMonth; const[y,m]=prefix.split('-'); const mn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][parseInt(m)-1]; label=mn+' '+y; }
+  else if(type==='custom-year'){ prefix=document.getElementById('stats-filter-year').value||curYear; label=prefix; }
+  else { prefix=''; label='All time'; }
   const lbl=document.getElementById('stats-filter-label');
   if(lbl) lbl.textContent=label?'Showing: '+label:'';
   return prefix;
 }
-
 function onStatsFilterChange(){
   const type=document.getElementById('stats-filter-type').value;
   document.getElementById('stats-filter-month').style.display=type==='custom-month'?'':'none';
@@ -766,14 +789,7 @@ function onStatsFilterChange(){
   }
   renderStats();
 }
-
-function filterByPrefix(arr,prefix){
-  if(!prefix) return arr;
-  return arr.filter(x=>{
-    const ymd=parseToYMD(x.date||'')||'';
-    return ymd.startsWith(prefix);
-  });
-}
+function filterByPrefix(arr,prefix){ if(!prefix) return arr; return arr.filter(x=>String(x.date||'').startsWith(prefix)); }
 
 function renderStats(){
   const prefix=getStatsFilter();
@@ -781,13 +797,16 @@ function renderStats(){
   const saaman=filterByPrefix(db.saaman,prefix);
   const box=filterByPrefix(db.box,prefix);
   const donations=filterByPrefix(db.donations,prefix);
-  const feeTotal  = payments.reduce((a,p)=>a+Number(p.amount||0),0);
-  const saamTotal = saaman.filter(s=>s.paid==='yes').reduce((a,s)=>a+Number(s.amount||0),0);
-  const saamDue   = saaman.filter(s=>s.paid==='no').reduce((a,s)=>a+Number(s.amount||0),0);
-  const boxTotal  = box.reduce((a,b)=>a+Number(b.amount||0),0);
-  const donTotal  = donations.reduce((a,d)=>a+Number(d.amount||0),0);
-  const overdue   = db.members.filter(m=>memberStatus(m)==='late').length;
-  const grand     = feeTotal+saamTotal+boxTotal+donTotal; // saamTotal already only counts paid
+  const feeTotal=payments.reduce((a,p)=>a+Number(p.amount||0),0);
+  const saamTotal=saaman.filter(s=>String(s.paid)==='yes').reduce((a,s)=>a+Number(s.amount||0),0);
+  const saamDue=saaman.filter(s=>String(s.paid)!=='yes').reduce((a,s)=>a+Number(s.amount||0),0);
+  const boxTotal=box.reduce((a,b)=>a+Number(b.amount||0),0);
+  const donTotal=donations.reduce((a,d)=>a+Number(d.amount||0),0);
+  const zakaatTotal=filterByPrefix(db.zakaat,prefix).reduce((a,z)=>a+Number(z.amount||0),0);
+  const zakaatExp=filterByPrefix(db.zakaat_expenses,prefix).reduce((a,z)=>a+Number(z.amount||0),0);
+  const zakaatBalance=zakaatTotal-zakaatExp;
+  const overdue=db.members.filter(m=>memberStatus(m)==='late').length;
+  const grand=feeTotal+saamTotal+boxTotal+donTotal+zakaatBalance;
   document.getElementById('stats').innerHTML=`
     <div class="stat"><div class="label">Members</div><div class="value">${db.members.length}</div></div>
     <div class="stat"><div class="label">Fees collected</div><div class="value" style="color:#27ae60">Rs ${feeTotal.toLocaleString()}</div></div>
@@ -795,28 +814,40 @@ function renderStats(){
     <div class="stat"><div class="label">Saaman unpaid</div><div class="value" style="color:#e67e22">Rs ${saamDue.toLocaleString()}</div></div>
     <div class="stat"><div class="label">Masjid box</div><div class="value" style="color:#27ae60">Rs ${boxTotal.toLocaleString()}</div></div>
     <div class="stat"><div class="label">Donations</div><div class="value" style="color:#27ae60">Rs ${donTotal.toLocaleString()}</div></div>
+    <div class="stat"><div class="label">Zakaat balance</div><div class="value" style="color:${zakaatBalance>=0?'#27ae60':'#e74c3c'}">Rs ${zakaatBalance.toLocaleString()}</div></div>
     <div class="stat"><div class="label">Non members</div><div class="value" style="color:#e74c3c">${overdue}</div></div>
     <div class="stat"><div class="label">Grand total</div><div class="value">Rs ${grand.toLocaleString()}</div></div>
   `;
 }
 
+// ── Members ────────────────────────────────────────────────────
 function renderMembers(){
   const q=(document.getElementById('search').value||'').toLowerCase();
   const fs=document.getElementById('filter-status').value;
-  const list=db.members.filter(m=>{
+  const sort=document.getElementById('members-sort')?document.getElementById('members-sort').value:'name';
+  let list=db.members.filter(m=>{
     if(q&&!String(m.name).toLowerCase().includes(q)) return false;
     if(fs&&memberStatus(m)!==fs) return false;
     return true;
   });
+  // Sort
+  const statusOrder={'ok':0,'warn':1,'late':2};
+  if(sort==='name') list.sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  else if(sort==='name-desc') list.sort((a,b)=>String(b.name).localeCompare(String(a.name)));
+  else if(sort==='paidto') list.sort((a,b)=>String(a.paid_to||'').localeCompare(String(b.paid_to||'')));
+  else if(sort==='paidto-desc') list.sort((a,b)=>String(b.paid_to||'').localeCompare(String(a.paid_to||'')));
+  else if(sort==='status') list.sort((a,b)=>(statusOrder[memberStatus(a)]||0)-(statusOrder[memberStatus(b)]||0));
   const tbody=document.getElementById('members-tbody');
   if(!list.length){tbody.innerHTML='<tr><td colspan="8" class="empty">No members found</td></tr>';return;}
   tbody.innerHTML=list.map((m,i)=>`<tr>
     <td>${i+1}</td><td><strong>${m.name}</strong></td>
-    <td>Rs ${Number(m.fee||0).toLocaleString()}</td>
-    <td>${formatMonth(m.paidTo)}</td><td>${statusBadge(memberStatus(m))}</td>
-    <td>${Number(m.entryFee||0)>0?'Rs '+Number(m.entryFee).toLocaleString():'—'}</td>
+    <td>${formatMonth(m.paid_to)}</td><td>${statusBadge(memberStatus(m))}</td>
+    <td>${Number(m.entry_fee||0)>0?'Rs '+Number(m.entry_fee).toLocaleString():'—'}</td>
     <td style="color:#888">${m.notes||''}</td>
-    <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteMember('${m.id}')">Remove</button>`:''}</td>
+    <td style="display:flex;gap:4px;flex-wrap:wrap">
+      ${can('write')?`<button class="btn btn-sm" onclick="editMember('${m.id}')">Edit</button>`:''}
+      ${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteMember('${m.id}')">Remove</button>`:''}
+    </td>
   </tr>`).join('');
 }
 
@@ -828,43 +859,37 @@ async function addMember(){
   if(!paidTo) return alert('Paid up to is required');
   const btn=document.getElementById('add-member-btn');
   btn.disabled=true; btn.textContent='Saving...';
-  // Pull fresh data first
   try {
-    const res=await fetch(SCRIPT_URL+'?action=read');
-    const latest=await res.json();
-    if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}
-  } catch(e){ console.error(e); }
-  const feeVal=document.getElementById('m-fee').value;
-  db.members.push({id:String(Date.now()),name,fee:feeVal!==''?feeVal:'0',joinDate:document.getElementById('m-date').value||'',paidTo,entryFee:document.getElementById('m-entry').value||'0',notes:document.getElementById('m-notes').value});
-  await saveToSheet(); renderAll();
-  ['m-name','m-entry','m-notes','m-date'].forEach(id=>document.getElementById(id).value='');
+    const newMember = {
+      id: String(Date.now()),
+      name,
+      fee: document.getElementById('m-fee').value||'0',
+      join_date: document.getElementById('m-date').value||null,
+      paid_to: paidTo,
+      entry_fee: document.getElementById('m-entry').value||'0',
+      notes: document.getElementById('m-notes').value||''
+    };
+    const result = await supaPost('members', newMember);
+    db.members.push(result[0]||newMember);
+    renderAll();
+    ['m-name','m-entry','m-notes','m-date'].forEach(id=>document.getElementById(id).value='');
+  } catch(e){ alert('Error saving member: '+e.message); console.error(e); }
   btn.disabled=false; btn.textContent='Add Member';
 }
+
 async function deleteMember(id){
   if(!can('write')) return;
   if(!confirm('Remove this member?')) return;
-  // Pull fresh data first to avoid overwriting changes from other devices
   try {
-    const res=await fetch(SCRIPT_URL+'?action=read');
-    const latest=await res.json();
-    if(!latest.error){
-      db.members=latest.members||db.members;
-      db.payments=latest.payments||db.payments;
-      db.saaman=latest.saaman||db.saaman;
-      db.box=latest.box||db.box;
-      db.donations=latest.donations||db.donations;
-      db.users=latest.users||db.users;
-    }
-  } catch(e){ console.error(e); }
-  db.members=db.members.filter(m=>String(m.id)!==String(id));
-  await saveToSheet(); renderAll();
+    await supaDelete('members','?id=eq.'+id);
+    db.members=db.members.filter(m=>String(m.id)!==String(id));
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); }
 }
 
 function populateMemberSelects(){
   const payOpts='<option value="">Select member</option>'+db.members.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
   const el1=document.getElementById('p-member');if(el1)el1.innerHTML=payOpts;
-
-  // Saaman dropdown — show Non member tag
   const saamOpts='<option value="">Select member</option>'+db.members.map(m=>{
     const status=memberStatus(m);
     const tag=status==='late'?' ⚠ NON MEMBER':'';
@@ -873,6 +898,65 @@ function populateMemberSelects(){
   const el2=document.getElementById('s-member');if(el2)el2.innerHTML=saamOpts;
 }
 
+// ── Payments ───────────────────────────────────────────────────
+function renderPayments(){
+  const tbody=document.getElementById('payments-tbody');
+  if(!db.payments.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No payments recorded</td></tr>';return;}
+  tbody.innerHTML=db.payments.map(p=>{
+    const m=db.members.find(x=>String(x.id)===String(p.member_id));
+    return`<tr>
+      <td>${formatDate(p.date)}</td><td>${m?m.name:p.member_name||'—'}</td>
+      <td class="pos">Rs ${Number(p.amount||0).toLocaleString()}</td>
+      <td>${formatMonth(p.paid_to)}</td>
+      <td>${Number(p.fine||0)>0?'<span class="neg">Rs '+Number(p.fine).toLocaleString()+'</span>':'—'}</td>
+      <td style="color:#888">${p.notes||''}</td>
+      <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deletePayment('${p.id}')">Del</button>`:''}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function addPayment(){
+  if(!can('write')) return alert('You have read-only access');
+  const mid=document.getElementById('p-member').value;
+  const m=db.members.find(x=>String(x.id)===String(mid));
+  if(!m) return alert('Select a member');
+  const amount=document.getElementById('p-amount').value;
+  if(!amount) return alert('Enter amount');
+  const paidTo=document.getElementById('p-paidto').value;
+  try {
+    const newPayment = {
+      id: String(Date.now()),
+      member_id: mid,
+      member_name: m.name,
+      date: document.getElementById('p-date').value,
+      amount,
+      paid_to: paidTo,
+      fine: document.getElementById('p-fine').value||'0',
+      notes: document.getElementById('p-notes').value||''
+    };
+    // Update member paid_to
+    if(paidTo){
+      await supaPatch('members',{paid_to:paidTo},'?id=eq.'+mid);
+      m.paid_to=paidTo;
+    }
+    const result=await supaPost('payments',newPayment);
+    db.payments.unshift(result[0]||newPayment);
+    renderAll();
+    ['p-amount','p-fine','p-notes'].forEach(id=>document.getElementById(id).value='');
+  } catch(e){ alert('Error: '+e.message); console.error(e); }
+}
+
+async function deletePayment(id){
+  if(!can('write')) return;
+  if(!confirm('Delete this payment?')) return;
+  try {
+    await supaDelete('payments','?id=eq.'+id);
+    db.payments=db.payments.filter(p=>String(p.id)!==String(id));
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); }
+}
+
+// ── Saaman ─────────────────────────────────────────────────────
 function getSaamanIsNonMember(){
   const type=document.getElementById('s-person-type').value;
   if(type==='walkin') return true;
@@ -880,7 +964,7 @@ function getSaamanIsNonMember(){
   const opt=sel?sel.options[sel.selectedIndex]:null;
   return opt?opt.getAttribute('data-status')==='late':false;
 }
-function isWalkinRecord(s){ return s.isWalkin===true||s.isWalkin==='true'; }
+function isWalkinRecord(s){ return s.is_walkin===true||s.is_walkin==='true'; }
 
 function renderSaamanItems(){
   const isNM=getSaamanIsNonMember();
@@ -894,7 +978,7 @@ function renderSaamanItems(){
       <td style="padding:6px 10px;">${item.name}</td>
       <td style="padding:6px 10px;text-align:center;color:#555;" id="sp-${i}">${priceDisplay}</td>
       <td style="padding:6px 10px;text-align:center;">
-        <input type="number" min="0" value="0" id="sq-${i}" ${disabled}
+        <input type="number" min="0" value="" placeholder="0" id="sq-${i}" ${disabled}
           style="width:55px;padding:4px 6px;text-align:center;font-size:12px;"
           oninput="calcSaamanTotal()" />
       </td>
@@ -909,7 +993,7 @@ function calcSaamanTotal(){
   let total=0;
   SAAMAN_ITEMS.forEach((item,i)=>{
     const price=isNM?(item.nonmember!==null?item.nonmember:null):item.member;
-    const qty=parseInt(document.getElementById('sq-'+i)?.value||0);
+    const qty=parseInt(document.getElementById('sq-'+i)?.value)||0;
     const sub=price!==null?price*qty:0;
     const subEl=document.getElementById('ss-'+i);
     if(subEl) subEl.textContent=sub>0?'Rs '+sub:'—';
@@ -925,13 +1009,10 @@ function toggleSaamanPerson(){
   const walkinInput=document.getElementById('s-walkin-name');
   const warn=document.getElementById('s-nonmember-warn');
   if(type==='walkin'){
-    memberSel.style.display='none';
-    walkinInput.style.display='block';
-    warn.style.display='block';
-    warn.innerHTML='&#9888; Walk-in <strong>Non Member</strong> — non member tariff applies!';
+    memberSel.style.display='none'; walkinInput.style.display='block';
+    warn.style.display='block'; warn.innerHTML='&#9888; Walk-in <strong>Non Member</strong> — non member tariff applies!';
   } else {
-    memberSel.style.display='block';
-    walkinInput.style.display='none';
+    memberSel.style.display='block'; walkinInput.style.display='none';
     onSaamanMemberChange();
   }
   renderSaamanItems();
@@ -943,78 +1024,53 @@ function onSaamanMemberChange(){
   if(!sel||!warn) return;
   const opt=sel.options[sel.selectedIndex];
   const status=opt?opt.getAttribute('data-status'):'';
-  const isNM=status==='late';
-  warn.style.display=isNM?'block':'none';
+  warn.style.display=status==='late'?'block':'none';
   renderSaamanItems();
 }
 
-function renderPayments(){
-  const tbody=document.getElementById('payments-tbody');
-  const list=[...db.payments].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No payments recorded</td></tr>';return;}
-  tbody.innerHTML=list.map(p=>{const m=db.members.find(x=>String(x.id)===String(p.memberId));return`<tr>
-    <td>${formatDate(p.date)}</td><td>${m?m.name:p.memberName||'—'}</td>
-    <td class="pos">Rs ${Number(p.amount||0).toLocaleString()}</td>
-    <td>${formatMonth(p.paidTo)}</td>
-    <td>${Number(p.fine||0)>0?'<span class="neg">Rs '+Number(p.fine).toLocaleString()+'</span>':'—'}</td>
-    <td style="color:#888">${p.notes||''}</td>
-    <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deletePayment('${p.id}')">Del</button>`:''}</td>
-  </tr>`;}).join('');
-}
-async function addPayment(){
-  if(!can('write')) return alert('You have read-only access');
-  const mid=document.getElementById('p-member').value;
-  const m=db.members.find(x=>String(x.id)===String(mid));
-  if(!m) return alert('Select a member');
-  const amount=document.getElementById('p-amount').value;
-  if(!amount) return alert('Enter amount');
-  const paidTo=document.getElementById('p-paidto').value;
-  if(paidTo) m.paidTo=paidTo;
-  db.payments.push({id:String(Date.now()),memberId:mid,memberName:m.name,date:document.getElementById('p-date').value,amount,paidTo,fine:document.getElementById('p-fine').value||'0',notes:document.getElementById('p-notes').value});
-  await saveToSheet(); renderAll();
-  ['p-amount','p-fine','p-notes'].forEach(id=>document.getElementById(id).value='');
-}
-async function deletePayment(id){if(!can('write'))return;if(!confirm('Delete this payment?'))return;try{const res=await fetch(SCRIPT_URL+'?action=read');const latest=await res.json();if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}}catch(e){console.error(e);}db.payments=db.payments.filter(p=>String(p.id)!==String(id));await saveToSheet();renderAll();}
-
 function renderSaaman(){
   const tbody=document.getElementById('saaman-tbody');
-  const list=[...db.saaman].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No saaman rentals recorded</td></tr>';return;}
-  tbody.innerHTML=list.map(s=>{const m=db.members.find(x=>String(x.id)===String(s.memberId));return`<tr>
-    <td>${formatDate(s.date)}</td><td>${s.memberName||'—'} ${s.isWalkin===true||s.isWalkin==='true'?'<span class="badge badge-late" style="font-size:10px">Walk-in</span>':m&&memberStatus(m)==='late'?'<span class="badge badge-late" style="font-size:10px">Non member</span>':''}</td>
-    <td style="color:#888">${s.items||'—'}</td>
-    <td class="pos">Rs ${Number(s.amount||0).toLocaleString()}</td>
-    <td>${s.paid==='yes'?'<span class="badge badge-paid">Paid</span>':'<span class="badge badge-unpaid">Unpaid</span>'}</td>
-    <td style="color:#888;font-size:11px">${s.receiptNo||'—'}</td>
-    <td style="color:#888">${s.notes||''}</td>
-    <td style="display:flex;gap:4px;flex-wrap:wrap">
-      ${can('write')?`<button class="btn btn-sm" onclick="editSaaman('${s.id}')">Edit</button>`:''}
-      ${s.paid==='no'&&can('write')?`<button class="btn btn-sm" onclick="markSaamanPaid('${s.id}')">Mark paid</button>`:''}
-      ${s.paid==='yes'&&can('write')?`<button class="btn btn-sm" onclick="markSaamanUnpaid('${s.id}')">Mark unpaid</button>`:''}
-      <button class="btn btn-sm" onclick="showReceipt('${s.id}')">&#128424; Receipt</button>
-      ${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteSaaman('${s.id}')">Del</button>`:''}
-    </td>
-  </tr>`;}).join('');
+  if(!db.saaman.length){tbody.innerHTML='<tr><td colspan="8" class="empty">No saaman rentals recorded</td></tr>';return;}
+  tbody.innerHTML=db.saaman.map(s=>{
+    const m=db.members.find(x=>String(x.id)===String(s.member_id));
+    const walkin=isWalkinRecord(s);
+    return`<tr>
+      <td>${formatDate(s.date)}</td>
+      <td>${s.member_name||'—'} ${walkin?'<span class="badge badge-late" style="font-size:10px">Walk-in</span>':m&&memberStatus(m)==='late'?'<span class="badge badge-late" style="font-size:10px">Non member</span>':''}</td>
+      <td style="color:#888;font-size:12px">${s.items||'—'}</td>
+      <td class="pos">Rs ${Number(s.amount||0).toLocaleString()}</td>
+      <td>${String(s.paid)==='yes'?'<span class="badge badge-paid">Paid</span>':'<span class="badge badge-unpaid">Unpaid</span>'}</td>
+      <td style="color:#888;font-size:11px">${s.receipt_no||'—'}</td>
+      <td style="color:#888">${s.notes||''}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">
+        ${can('write')?`<button class="btn btn-sm" onclick="editSaaman('${s.id}')">Edit</button>`:''}
+        ${String(s.paid)!=='yes'&&can('write')?`<button class="btn btn-sm" onclick="markSaamanPaid('${s.id}')">Mark paid</button>`:''}
+        ${String(s.paid)==='yes'&&can('write')?`<button class="btn btn-sm" onclick="markSaamanUnpaid('${s.id}')">Mark unpaid</button>`:''}
+        <button class="btn btn-sm" onclick="showReceipt('${s.id}')">&#128424; Receipt</button>
+        ${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteSaaman('${s.id}')">Del</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
 }
+
 async function addSaaman(){
   if(!can('write')) return alert('You have read-only access');
   const personType=document.getElementById('s-person-type').value;
-  let mid='', memberName='', isWalkin=false;
+  let memberId='', memberName='', isWalkin=false;
   if(personType==='walkin'){
     memberName=document.getElementById('s-walkin-name').value.trim();
     if(!memberName) return alert('Enter the person name');
     isWalkin=true;
   } else {
-    mid=document.getElementById('s-member').value;
-    const m=db.members.find(x=>String(x.id)===String(mid));
+    memberId=document.getElementById('s-member').value;
+    const m=db.members.find(x=>String(x.id)===String(memberId));
     if(!m) return alert('Select a member');
     memberName=m.name;
   }
-  // Build items list and total from selector
   const isNM=getSaamanIsNonMember();
   let itemsList=[], total=0;
   SAAMAN_ITEMS.forEach((item,i)=>{
-    const qty=parseInt(document.getElementById('sq-'+i)?.value||0);
+    const qty=parseInt(document.getElementById('sq-'+i)?.value)||0;
     if(qty>0){
       const price=isNM?(item.nonmember!==null?item.nonmember:0):item.member;
       const sub=price*qty;
@@ -1023,65 +1079,66 @@ async function addSaaman(){
     }
   });
   if(itemsList.length===0) return alert('Please select at least one item');
-  const itemsStr=itemsList.join(', ');
-  // Pull fresh data first
+  // Get unique receipt number from Supabase
+  let receiptNo='RCP-000001';
   try {
-    const res=await fetch(SCRIPT_URL+'?action=read');
-    const latest=await res.json();
-    if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}
-  } catch(e){ console.error(e); }
-  // Generate unique receipt number by reading latest from Google Sheets
-  let nextNo = 1;
-  try {
-    const rres=await fetch(SCRIPT_URL+'?action=read');
-    const rdata=await rres.json();
-    if(!rdata.error){
-      db.members=rdata.members||db.members;
-      db.payments=rdata.payments||db.payments;
-      db.saaman=rdata.saaman||db.saaman;
-      db.box=rdata.box||db.box;
-      db.donations=rdata.donations||db.donations;
-      db.users=rdata.users||db.users;
-      // Find highest receipt number across all saaman records
-      const nums=(rdata.saaman||[]).map(s=>{
-        if(!s.receiptNo) return 0;
-        const match=String(s.receiptNo).match(/(\d+)$/);
-        return match?parseInt(match[1]):0;
-      });
-      nextNo=Math.max(0,...nums)+1;
+    const existing=await supaGet('saaman','?select=receipt_no&order=receipt_no.desc&limit=1');
+    if(existing.length&&existing[0].receipt_no){
+      const match=String(existing[0].receipt_no).match(/([0-9]+)$/);
+      const next=match?parseInt(match[1])+1:1;
+      receiptNo='RCP-'+String(next).padStart(6,'0');
     }
-  } catch(e){ console.error(e); nextNo=db.saaman.length+1; }
-  const receiptNo='RCP-'+String(nextNo).padStart(6,'0');
-  db.receiptCounter=nextNo;
-  db.saaman.push({id:String(Date.now()),memberId:mid,memberName,isWalkin,date:document.getElementById('s-date').value,amount:String(total),items:itemsStr,paid:document.getElementById('s-paid').value,notes:document.getElementById('s-notes').value,receiptNo});
-  await saveToSheet(); renderAll();
-  // Reset form
-  SAAMAN_ITEMS.forEach((_,i)=>{const el=document.getElementById('sq-'+i);if(el)el.value='0';});
-  document.getElementById('s-total-display').textContent='Rs 0';
-  ['s-notes','s-walkin-name'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('s-paid').value='no';
-  document.getElementById('s-person-type').value='member';
-  toggleSaamanPerson();
+  } catch(e){ console.error(e); }
+  try {
+    const newSaaman = {
+      id: String(Date.now()),
+      member_id: memberId||null,
+      member_name: memberName,
+      is_walkin: isWalkin,
+      date: document.getElementById('s-date').value,
+      amount: String(total),
+      items: itemsList.join(', '),
+      paid: document.getElementById('s-paid').value,
+      notes: document.getElementById('s-notes').value||'',
+      receipt_no: receiptNo
+    };
+    const result=await supaPost('saaman',newSaaman);
+    db.saaman.unshift(result[0]||newSaaman);
+    renderAll();
+    SAAMAN_ITEMS.forEach((_,i)=>{const el=document.getElementById('sq-'+i);if(el)el.value='';});
+    document.getElementById('s-total-display').textContent='Rs 0';
+    ['s-notes','s-walkin-name'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('s-paid').value='no';
+    document.getElementById('s-person-type').value='member';
+    toggleSaamanPerson();
+  } catch(e){ alert('Error: '+e.message); console.error(e); }
 }
+
 async function markSaamanPaid(id){
-  if(!can('write'))return;
-  const s=db.saaman.find(x=>String(x.id)===String(id));
-  if(s){ s.paid='yes'; await saveToSheet(); }
-  else { alert('Record not found. Please refresh and try again.'); }
+  if(!can('write')) return;
+  try {
+    await supaPatch('saaman',{paid:'yes'},'?id=eq.'+id);
+    const s=db.saaman.find(x=>String(x.id)===String(id));
+    if(s) s.paid='yes';
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); }
 }
 
 async function markSaamanUnpaid(id){
-  if(!can('write'))return;
-  const s=db.saaman.find(x=>String(x.id)===String(id));
-  if(s){ s.paid='no'; await saveToSheet(); }
-  else { alert('Record not found. Please refresh and try again.'); }
+  if(!can('write')) return;
+  try {
+    await supaPatch('saaman',{paid:'no'},'?id=eq.'+id);
+    const s=db.saaman.find(x=>String(x.id)===String(id));
+    if(s) s.paid='no';
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); }
 }
 
 function editSaaman(id){
   const s=db.saaman.find(x=>String(x.id)===String(id));
   if(!s) return;
   document.getElementById('edit-saaman-id').value=id;
-  document.getElementById('edit-saaman-name').value=s.memberName||'';
+  document.getElementById('edit-saaman-name').value=s.member_name||'';
   document.getElementById('edit-saaman-date').value=String(s.date||'').split('T')[0];
   document.getElementById('edit-saaman-items').value=s.items||'';
   document.getElementById('edit-saaman-amount').value=s.amount||'';
@@ -1089,114 +1146,114 @@ function editSaaman(id){
   document.getElementById('edit-saaman-notes').value=s.notes||'';
   document.getElementById('saaman-edit-modal').classList.add('active');
 }
-
-function closeSaamanEdit(){
-  document.getElementById('saaman-edit-modal').classList.remove('active');
-}
+function closeSaamanEdit(){ document.getElementById('saaman-edit-modal').classList.remove('active'); }
 
 async function saveSaamanEdit(){
   const id=document.getElementById('edit-saaman-id').value;
-  const s=db.saaman.find(x=>String(x.id)===String(id));
-  if(!s) return alert('Record not found');
-  s.memberName=document.getElementById('edit-saaman-name').value;
-  s.date=document.getElementById('edit-saaman-date').value;
-  s.items=document.getElementById('edit-saaman-items').value;
-  s.amount=document.getElementById('edit-saaman-amount').value;
-  s.paid=document.getElementById('edit-saaman-paid').value;
-  s.notes=document.getElementById('edit-saaman-notes').value;
-  closeSaamanEdit();
-  await saveToSheet();
-}
-
-function showReceipt(id){
-  const s=db.saaman.find(x=>String(x.id)===String(id));
-  if(!s) return;
-  const m=db.members.find(x=>String(x.id)===String(s.memberId));
-  document.getElementById('r-no').textContent=s.receiptNo;
-  document.getElementById('r-date').textContent=formatDate(s.date);
-  document.getElementById('r-person').textContent=s.memberName||'—';
-  const isWalk=s.isWalkin===true||s.isWalkin==='true';
-  document.getElementById('r-status').innerHTML=isWalk?'<span class="receipt-status-unpaid">Non Member (Walk-in)</span>':!m?'—':memberStatus(m)==='ok'?'<span class="receipt-status-paid">Member</span>':memberStatus(m)==='warn'?'<span style="color:#856404;font-weight:700">Due soon</span>':'<span class="receipt-status-unpaid">Non Member</span>';
-  document.getElementById('r-items').textContent=s.items||'—';
-  document.getElementById('r-notes').textContent=s.notes||'—';
-  document.getElementById('r-amount').textContent='Rs '+Number(s.amount||0).toLocaleString();
-  document.getElementById('r-paid').innerHTML=s.paid==='yes'?'<span class="receipt-status-paid">&#10003; Paid</span>':'<span class="receipt-status-unpaid">&#10007; Not yet paid</span>';
-  document.getElementById('receipt-modal').classList.add('active');
-}
-
-function closeReceipt(){ document.getElementById('receipt-modal').classList.remove('active'); }
-function printReceipt(){ window.print(); }
-
-async function downloadReceipt(){
-  const box=document.getElementById('receipt-content');
-  const rno=document.getElementById('r-no').textContent||'receipt';
+  const updates={
+    member_name:document.getElementById('edit-saaman-name').value,
+    date:document.getElementById('edit-saaman-date').value,
+    items:document.getElementById('edit-saaman-items').value,
+    amount:document.getElementById('edit-saaman-amount').value,
+    paid:document.getElementById('edit-saaman-paid').value,
+    notes:document.getElementById('edit-saaman-notes').value
+  };
   try {
-    const canvas=await html2canvas(box,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
-    const imgData=canvas.toDataURL('image/png');
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a6'});
-    const pdfW=pdf.internal.pageSize.getWidth();
-    const pdfH=(canvas.height*pdfW)/canvas.width;
-    pdf.addImage(imgData,'PNG',0,0,pdfW,pdfH);
-    pdf.save(rno+'.pdf');
-  } catch(e){
-    alert('Could not generate PDF. Please use Print instead.');
-    console.error(e);
-  }
+    await supaPatch('saaman',updates,'?id=eq.'+id);
+    const s=db.saaman.find(x=>String(x.id)===String(id));
+    if(s) Object.assign(s,updates);
+    closeSaamanEdit(); renderAll();
+  } catch(e){ alert('Error: '+e.message); }
 }
-async function deleteSaaman(id){if(!can('write'))return;if(!confirm('Delete this rental?'))return;try{const res=await fetch(SCRIPT_URL+'?action=read');const latest=await res.json();if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}}catch(e){console.error(e);}db.saaman=db.saaman.filter(s=>String(s.id)!==String(id));await saveToSheet();renderAll();}
 
+async function deleteSaaman(id){
+  if(!can('write')) return;
+  if(!confirm('Delete this rental?')) return;
+  try {
+    await supaDelete('saaman','?id=eq.'+id);
+    db.saaman=db.saaman.filter(s=>String(s.id)!==String(id));
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); }
+}
+
+// ── Box ────────────────────────────────────────────────────────
 function renderBox(){
   const tbody=document.getElementById('box-tbody');
-  const list=[...db.box].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  if(!list.length){tbody.innerHTML='<tr><td colspan="5" class="empty">No entries yet</td></tr>';return;}
-  tbody.innerHTML=list.map(b=>`<tr>
+  if(!db.box.length){tbody.innerHTML='<tr><td colspan="5" class="empty">No entries yet</td></tr>';return;}
+  tbody.innerHTML=db.box.map(b=>`<tr>
     <td>${formatDate(b.date)}</td><td class="pos">Rs ${Number(b.amount||0).toLocaleString()}</td>
-    <td>${b.by||'—'}</td><td style="color:#888">${b.notes||''}</td>
+    <td>${b.collected_by||'—'}</td><td style="color:#888">${b.notes||''}</td>
     <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteBox('${b.id}')">Del</button>`:''}</td>
   </tr>`).join('');
 }
+
 async function addBox(){
   if(!can('write')) return alert('You have read-only access');
   const amount=document.getElementById('b-amount').value;
   if(!amount) return alert('Enter amount');
-  db.box.push({id:String(Date.now()),date:document.getElementById('b-date').value,amount,by:document.getElementById('b-by').value,notes:document.getElementById('b-notes').value});
-  await saveToSheet(); renderAll();
-  ['b-amount','b-by','b-notes'].forEach(id=>document.getElementById(id).value='');
+  try {
+    const newBox={id:String(Date.now()),date:document.getElementById('b-date').value,amount,collected_by:document.getElementById('b-by').value||'',notes:document.getElementById('b-notes').value||''};
+    const result=await supaPost('box',newBox);
+    db.box.unshift(result[0]||newBox);
+    renderAll();
+    ['b-amount','b-by','b-notes'].forEach(id=>document.getElementById(id).value='');
+  } catch(e){ alert('Error: '+e.message); }
 }
-async function deleteBox(id){if(!can('write'))return;if(!confirm('Delete this entry?'))return;try{const res=await fetch(SCRIPT_URL+'?action=read');const latest=await res.json();if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}}catch(e){console.error(e);}db.box=db.box.filter(b=>String(b.id)!==String(id));await saveToSheet();renderAll();}
 
+async function deleteBox(id){
+  if(!can('write')) return;
+  if(!confirm('Delete this entry?')) return;
+  try {
+    await supaDelete('box','?id=eq.'+id);
+    db.box=db.box.filter(b=>String(b.id)!==String(id));
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); }
+}
+
+// ── Donations ──────────────────────────────────────────────────
 function renderDonations(){
   const tbody=document.getElementById('donations-tbody');
-  const list=[...db.donations].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  if(!list.length){tbody.innerHTML='<tr><td colspan="5" class="empty">No donations yet</td></tr>';return;}
-  tbody.innerHTML=list.map(d=>`<tr>
+  if(!db.donations.length){tbody.innerHTML='<tr><td colspan="5" class="empty">No donations yet</td></tr>';return;}
+  tbody.innerHTML=db.donations.map(d=>`<tr>
     <td>${formatDate(d.date)}</td><td><strong>${d.donor||'Anonymous'}</strong></td>
     <td class="pos">Rs ${Number(d.amount||0).toLocaleString()}</td>
     <td style="color:#888">${d.notes||''}</td>
     <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteDonation('${d.id}')">Del</button>`:''}</td>
   </tr>`).join('');
 }
+
 async function addDonation(){
   if(!can('write')) return alert('You have read-only access');
   const amount=document.getElementById('d-amount').value;
   if(!amount) return alert('Enter amount');
-  db.donations.push({id:String(Date.now()),date:document.getElementById('d-date').value,donor:document.getElementById('d-donor').value||'Anonymous',amount,notes:document.getElementById('d-notes').value});
-  await saveToSheet(); renderAll();
-  ['d-donor','d-amount','d-notes'].forEach(id=>document.getElementById(id).value='');
+  try {
+    const newDon={id:String(Date.now()),date:document.getElementById('d-date').value,donor:document.getElementById('d-donor').value||'Anonymous',amount,notes:document.getElementById('d-notes').value||''};
+    const result=await supaPost('donations',newDon);
+    db.donations.unshift(result[0]||newDon);
+    renderAll();
+    ['d-donor','d-amount','d-notes'].forEach(id=>document.getElementById(id).value='');
+  } catch(e){ alert('Error: '+e.message); }
 }
-async function deleteDonation(id){if(!can('write'))return;if(!confirm('Delete this donation?'))return;try{const res=await fetch(SCRIPT_URL+'?action=read');const latest=await res.json();if(!latest.error){db.members=latest.members||db.members;db.payments=latest.payments||db.payments;db.saaman=latest.saaman||db.saaman;db.box=latest.box||db.box;db.donations=latest.donations||db.donations;db.users=latest.users||db.users;}}catch(e){console.error(e);}db.donations=db.donations.filter(d=>String(d.id)!==String(id));await saveToSheet();renderAll();}
 
-// ── USERS ─────────────────────────────────────────────────────
+async function deleteDonation(id){
+  if(!can('write')) return;
+  if(!confirm('Delete this donation?')) return;
+  try {
+    await supaDelete('donations','?id=eq.'+id);
+    db.donations=db.donations.filter(d=>String(d.id)!==String(id));
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); }
+}
+
+// ── Users ──────────────────────────────────────────────────────
 function renderUsers(){
   const tbody=document.getElementById('users-tbody');
-  const list=db.users||[];
-  if(!list.length){tbody.innerHTML='<tr><td colspan="4" class="empty">No users created yet</td></tr>';return;}
-  tbody.innerHTML=list.map(u=>`<tr>
+  if(!db.users.length){tbody.innerHTML='<tr><td colspan="4" class="empty">No users created yet</td></tr>';return;}
+  tbody.innerHTML=db.users.map(u=>`<tr>
     <td><strong>${u.username}</strong></td>
-    <td>${u.access==='rw'?'<span class="badge badge-rw">Read &amp; Write</span>':'<span class="badge badge-ro">Read Only</span>'}</td>
-    <td style="font-size:12px;color:#555">${(u.modules||[]).join(', ')}</td>
-    <td><button class="btn btn-sm btn-danger" onclick="deleteUser('${u.username}')">Remove</button></td>
+    <td>${u.access==='rw'?'<span class="badge badge-ok">Read &amp; Write</span>':'<span class="badge" style="background:#e2e3e5;color:#383d41">Read Only</span>'}</td>
+    <td style="font-size:12px;color:#555">${u.modules||''}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})">Remove</button></td>
   </tr>`).join('');
 }
 
@@ -1206,90 +1263,119 @@ async function addUser(){
   const access=document.getElementById('u-access').value;
   if(!username||!password) return alert('Enter username and password');
   if(username==='admin') return alert('Cannot use "admin" as username');
-  if(db.users.find(u=>u.username===username)) return alert('Username already exists');
-  const modules=['members','payments','saaman','box','donations'].filter(m=>document.getElementById('u-mod-'+m).checked);
+  const modules=['members','payments','saaman','box','donations','zakaat'].filter(m=>document.getElementById('u-mod-'+m).checked);
   if(!modules.length) return alert('Select at least one module');
-  db.users.push({username,password,access,modules});
-  await saveToSheet(); renderUsers();
-  document.getElementById('u-name').value='';
-  document.getElementById('u-pass').value='';
+  try {
+    const result=await supaPost('users',{username,password,access,modules:modules.join(',')});
+    db.users.push(result[0]);
+    renderUsers();
+    document.getElementById('u-name').value='';
+    document.getElementById('u-pass').value='';
+  } catch(e){ alert('Error: '+e.message); }
 }
 
-async function deleteUser(username){
-  if(!confirm('Remove user '+username+'?')) return;
-  db.users=db.users.filter(u=>u.username!==username);
-  await saveToSheet(); renderUsers();
+async function deleteUser(id){
+  if(!confirm('Remove this user?')) return;
+  try {
+    await supaDelete('users','?id=eq.'+id);
+    db.users=db.users.filter(u=>u.id!==id);
+    renderUsers();
+  } catch(e){ alert('Error: '+e.message); }
 }
 
-// ── REPORTS ───────────────────────────────────────────────────
-function toggleReportType(){
-  const type=document.getElementById('rpt-type').value;
-  document.getElementById('rpt-month-group').style.display=type==='monthly'?'':'none';
-  document.getElementById('rpt-date-group').style.display=type==='session'?'':'none';
+// ── Reports ────────────────────────────────────────────────────
+
+
+function toggleAllReportModules(cb){
+  ['fees','box','donations','saaman','zakaat'].forEach(m=>{
+    document.getElementById('rpt-mod-'+m).checked=cb.checked;
+  });
 }
+function syncAllCheckbox(){
+  const all=['fees','box','donations','saaman','zakaat'].every(m=>document.getElementById('rpt-mod-'+m).checked);
+  document.getElementById('rpt-mod-all').checked=all;
+}
+function rptMod(m){ return document.getElementById('rpt-mod-'+m).checked; }
 
 function generateReport(){
-  const type=document.getElementById('rpt-type').value;
-  let fees,box,donations,saaman,title;
-
-  if(type==='monthly'){
-    const month=document.getElementById('rpt-month').value;
-    if(!month) return alert('Please select a month');
-    const [y,m]=month.split('-');
-    const mName=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][parseInt(m)-1];
-    title='Monthly Collection Report — '+mName+' '+y;
-    fees=db.payments.filter(p=>(parseToYMD(p.date)||'').startsWith(month));
-    box=db.box.filter(b=>(parseToYMD(b.date)||'').startsWith(month));
-    donations=db.donations.filter(d=>(parseToYMD(d.date)||'').startsWith(month));
-    saaman=db.saaman.filter(s=>(parseToYMD(s.date)||'').startsWith(month));
-  } else {
-    const date=document.getElementById('rpt-date').value;
-    if(!date) return alert('Please select a date');
-    title='Session Report — '+formatDate(date);
-    fees=db.payments.filter(p=>(parseToYMD(p.date)||'')===date);
-    box=db.box.filter(b=>(parseToYMD(b.date)||'')===date);
-    donations=db.donations.filter(d=>(parseToYMD(d.date)||'')===date);
-    saaman=db.saaman.filter(s=>(parseToYMD(s.date)||'')===date);
-  }
+  let prefix='', fees, box, donations, saaman, zakaat, zakaatExp, title;
+  const month=document.getElementById('rpt-month').value;
+  if(!month) return alert('Please select a month');
+  const[y,m]=month.split('-');
+  const mName=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][parseInt(m)-1];
+  title='Monthly Collection Report — '+mName+' '+y;
+  prefix=month;
+  fees       = db.payments.filter(p=>String(p.date).startsWith(prefix));
+  box        = db.box.filter(b=>String(b.date).startsWith(prefix));
+  donations  = db.donations.filter(d=>String(d.date).startsWith(prefix));
+  saaman     = db.saaman.filter(s=>String(s.date).startsWith(prefix));
+  zakaat     = db.zakaat.filter(z=>String(z.date).startsWith(prefix));
+  zakaatExp  = db.zakaat_expenses.filter(z=>String(z.date).startsWith(prefix));
 
   document.getElementById('rpt-title').textContent=title;
-  const now=new Date();
   document.getElementById('rpt-generated').textContent='Generated: '+formatDate(getLocalDate());
   document.getElementById('rpt-gen-date').textContent=formatDate(getLocalDate());
 
+  // Show/hide sections based on selected modules
+  const sections=['fees','box','donations','saaman','zakaat'];
+  sections.forEach(s=>{
+    const sec=document.getElementById('rpt-section-'+s);
+    if(sec) sec.style.display=rptMod(s)?'':'none';
+  });
+
   // Fees
-  const feesTotal=fees.reduce((a,p)=>a+Number(p.amount||0),0);
-  document.getElementById('rpt-fees-body').innerHTML=fees.length?fees.map((p,i)=>{
-    const m=db.members.find(x=>String(x.id)===String(p.memberId));
-    return`<tr><td>${i+1}</td><td>${m?m.name:p.memberName||'—'}</td><td class="pos">Rs ${Number(p.amount||0).toLocaleString()}</td><td>${formatMonth(p.paidTo)}</td><td>${Number(p.fine||0)>0?'Rs '+Number(p.fine).toLocaleString():'—'}</td><td>${formatDate(p.date)}</td></tr>`;
-  }).join(''):'<tr><td colspan="6" class="empty">No fees collected</td></tr>';
-  document.getElementById('rpt-fees-total').textContent='Rs '+feesTotal.toLocaleString();
+  const feesTotal=rptMod('fees')?fees.reduce((a,p)=>a+Number(p.amount||0),0):0;
+  if(rptMod('fees')){
+    document.getElementById('rpt-fees-body').innerHTML=fees.length?fees.map((p,i)=>{
+      const m=db.members.find(x=>String(x.id)===String(p.member_id));
+      return`<tr><td>${i+1}</td><td>${m?m.name:p.member_name||'—'}</td><td class="pos">Rs ${Number(p.amount||0).toLocaleString()}</td><td>${formatMonth(p.paid_to)}</td><td>${Number(p.fine||0)>0?'Rs '+Number(p.fine).toLocaleString():'—'}</td><td>${formatDate(p.date)}</td></tr>`;
+    }).join(''):'<tr><td colspan="6" class="empty">No fees collected</td></tr>';
+    document.getElementById('rpt-fees-total').textContent='Rs '+feesTotal.toLocaleString();
+  }
 
   // Box
-  const boxTotal=box.reduce((a,b)=>a+Number(b.amount||0),0);
-  document.getElementById('rpt-box-body').innerHTML=box.length?box.map((b,i)=>`<tr><td>${i+1}</td><td>${formatDate(b.date)}</td><td class="pos">Rs ${Number(b.amount||0).toLocaleString()}</td><td>${b.by||'—'}</td><td style="color:#888">${b.notes||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No box entries</td></tr>';
-  document.getElementById('rpt-box-total').textContent='Rs '+boxTotal.toLocaleString();
+  const boxTotal=rptMod('box')?box.reduce((a,b)=>a+Number(b.amount||0),0):0;
+  if(rptMod('box')){
+    document.getElementById('rpt-box-body').innerHTML=box.length?box.map((b,i)=>`<tr><td>${i+1}</td><td>${formatDate(b.date)}</td><td class="pos">Rs ${Number(b.amount||0).toLocaleString()}</td><td>${b.collected_by||'—'}</td><td style="color:#888">${b.notes||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No box entries</td></tr>';
+    document.getElementById('rpt-box-total').textContent='Rs '+boxTotal.toLocaleString();
+  }
 
   // Donations
-  const donTotal=donations.reduce((a,d)=>a+Number(d.amount||0),0);
-  document.getElementById('rpt-don-body').innerHTML=donations.length?donations.map((d,i)=>`<tr><td>${i+1}</td><td>${formatDate(d.date)}</td><td>${d.donor||'Anonymous'}</td><td class="pos">Rs ${Number(d.amount||0).toLocaleString()}</td><td style="color:#888">${d.notes||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No donations</td></tr>';
-  document.getElementById('rpt-don-total').textContent='Rs '+donTotal.toLocaleString();
+  const donTotal=rptMod('donations')?donations.reduce((a,d)=>a+Number(d.amount||0),0):0;
+  if(rptMod('donations')){
+    document.getElementById('rpt-don-body').innerHTML=donations.length?donations.map((d,i)=>`<tr><td>${i+1}</td><td>${formatDate(d.date)}</td><td>${d.donor||'Anonymous'}</td><td class="pos">Rs ${Number(d.amount||0).toLocaleString()}</td><td style="color:#888">${d.notes||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No donations</td></tr>';
+    document.getElementById('rpt-don-total').textContent='Rs '+donTotal.toLocaleString();
+  }
 
   // Saaman
-  const saamTotal=saaman.reduce((a,s)=>a+Number(s.amount||0),0);
-  document.getElementById('rpt-saam-body').innerHTML=saaman.length?saaman.map((s,i)=>`<tr><td>${i+1}</td><td>${formatDate(s.date)}</td><td>${s.memberName||'—'}</td><td style="color:#888">${s.items||'—'}</td><td class="pos">Rs ${Number(s.amount||0).toLocaleString()}</td><td>${s.paid==='yes'?'<span class="badge badge-paid">Paid</span>':'<span class="badge badge-unpaid">Unpaid</span>'}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No saaman rentals</td></tr>';
-  document.getElementById('rpt-saam-total').textContent='Rs '+saamTotal.toLocaleString();
+  const saamTotal=rptMod('saaman')?saaman.reduce((a,s)=>a+Number(s.amount||0),0):0;
+  if(rptMod('saaman')){
+    document.getElementById('rpt-saam-body').innerHTML=saaman.length?saaman.map((s,i)=>`<tr><td>${i+1}</td><td>${formatDate(s.date)}</td><td>${s.member_name||'—'}</td><td style="color:#888">${s.items||'—'}</td><td class="pos">Rs ${Number(s.amount||0).toLocaleString()}</td><td>${String(s.paid)==='yes'?'<span class="badge badge-paid">Paid</span>':'<span class="badge badge-unpaid">Unpaid</span>'}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No saaman rentals</td></tr>';
+    document.getElementById('rpt-saam-total').textContent='Rs '+saamTotal.toLocaleString();
+  }
 
-  // Grand total
-  const grand=feesTotal+boxTotal+donTotal+saamTotal;
+  // Zakaat
+  let zakaatBal=0;
+  if(rptMod('zakaat')){
+    const zakaatIncome=zakaat.reduce((a,z)=>a+Number(z.amount||0),0);
+    const zakaatExpTotal=zakaatExp.reduce((a,z)=>a+Number(z.amount||0),0);
+    zakaatBal=zakaatIncome-zakaatExpTotal;
+    document.getElementById('rpt-zakaat-body').innerHTML=zakaat.length?zakaat.map((z,i)=>`<tr><td>${i+1}</td><td>${formatDate(z.date)}</td><td>${z.name||'Anonymous'}</td><td class="pos">Rs ${Number(z.amount||0).toLocaleString()}</td><td>${z.payment_method||'—'}</td><td>${z.collected_by||'—'}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No zakaat received</td></tr>';
+    document.getElementById('rpt-zakaat-total').textContent='Rs '+zakaatIncome.toLocaleString();
+    document.getElementById('rpt-zakaat-exp-body').innerHTML=zakaatExp.length?zakaatExp.map((z,i)=>`<tr><td>${i+1}</td><td>${formatDate(z.date)}</td><td>${z.description||'—'}</td><td class="neg">Rs ${Number(z.amount||0).toLocaleString()}</td><td>${z.paid_to||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No zakaat expenses</td></tr>';
+    document.getElementById('rpt-zakaat-exp-total').textContent='Rs '+zakaatExpTotal.toLocaleString();
+    document.getElementById('rpt-zakaat-balance').textContent='Rs '+zakaatBal.toLocaleString();
+    document.getElementById('rpt-zakaat-balance').style.color=zakaatBal>=0?'#27ae60':'#e74c3c';
+  }
+
+  // Grand total — only sum selected modules
+  const grand=(rptMod('fees')?feesTotal:0)+(rptMod('box')?boxTotal:0)+(rptMod('donations')?donTotal:0)+(rptMod('saaman')?saamTotal:0)+(rptMod('zakaat')?zakaatBal:0);
   document.getElementById('rpt-grand-total').textContent='Rs '+grand.toLocaleString();
-
   document.getElementById('report-output').style.display='block';
   document.getElementById('report-content').scrollIntoView({behavior:'smooth'});
 }
 
 function printReport(){ window.print(); }
-
 async function downloadReport(){
   const box=document.getElementById('report-content');
   const title=document.getElementById('rpt-title').textContent||'report';
@@ -1298,27 +1384,358 @@ async function downloadReport(){
     const canvas=await html2canvas(box,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
     document.getElementById('rpt-actions').style.display='flex';
     const imgData=canvas.toDataURL('image/png');
-    const {jsPDF}=window.jspdf;
+    const{jsPDF}=window.jspdf;
     const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     const pdfW=pdf.internal.pageSize.getWidth();
     const pdfH=(canvas.height*pdfW)/canvas.width;
     pdf.addImage(imgData,'PNG',0,0,pdfW,pdfH);
     pdf.save(title+'.pdf');
-  } catch(e){
-    document.getElementById('rpt-actions').style.display='flex';
-    alert('Could not generate PDF. Please use Print instead.');
-    console.error(e);
-  }
+  } catch(e){ document.getElementById('rpt-actions').style.display='flex'; alert('Could not generate PDF. Please use Print instead.'); }
 }
 
+// ── Receipt ────────────────────────────────────────────────────
+function showReceipt(id){
+  const s=db.saaman.find(x=>String(x.id)===String(id));
+  if(!s) return;
+  const m=db.members.find(x=>String(x.id)===String(s.member_id));
+  const walkin=isWalkinRecord(s);
+  document.getElementById('r-no').textContent=s.receipt_no||'—';
+  document.getElementById('r-date').textContent=formatDate(s.date);
+  document.getElementById('r-person').textContent=s.member_name||'—';
+  document.getElementById('r-status').innerHTML=walkin?'<span class="receipt-status-unpaid">Non Member (Walk-in)</span>':!m?'—':memberStatus(m)==='ok'?'<span class="receipt-status-paid">Member</span>':memberStatus(m)==='warn'?'<span style="color:#856404;font-weight:700">Due soon</span>':'<span class="receipt-status-unpaid">Non Member</span>';
+  document.getElementById('r-items').textContent=s.items||'—';
+  document.getElementById('r-notes').textContent=s.notes||'—';
+  document.getElementById('r-amount').textContent='Rs '+Number(s.amount||0).toLocaleString();
+  document.getElementById('r-paid').innerHTML=String(s.paid)==='yes'?'<span class="receipt-status-paid">&#10003; Paid</span>':'<span class="receipt-status-unpaid">&#10007; Not yet paid</span>';
+  document.getElementById('receipt-modal').classList.add('active');
+}
+function closeReceipt(){ document.getElementById('receipt-modal').classList.remove('active'); }
+function printReceipt(){ window.print(); }
+async function downloadReceipt(){
+  const box=document.getElementById('receipt-content');
+  const rno=document.getElementById('r-no').textContent||'receipt';
+  try {
+    const canvas=await html2canvas(box,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
+    const imgData=canvas.toDataURL('image/png');
+    const{jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a6'});
+    const pdfW=pdf.internal.pageSize.getWidth();
+    const pdfH=(canvas.height*pdfW)/canvas.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfW,pdfH);
+    pdf.save(rno+'.pdf');
+  } catch(e){ alert('Could not generate PDF. Please use Print instead.'); }
+}
+
+// ── Zakaat ────────────────────────────────────────────────────
+function renderZakaat(){
+  const tbody=document.getElementById('zakaat-tbody');
+  if(!db.zakaat.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No zakaat recorded</td></tr>';return;}
+  tbody.innerHTML=db.zakaat.map(z=>`<tr>
+    <td>${formatDate(z.date)}</td>
+    <td><strong>${z.name||'Anonymous'}</strong></td>
+    <td class="pos">Rs ${Number(z.amount||0).toLocaleString()}</td>
+    <td>${z.payment_method||'—'}</td>
+    <td>${z.collected_by||'—'}</td>
+    <td style="color:#888;font-size:11px">${z.receipt_no||'—'}</td>
+    <td style="color:#888">${z.notes||''}</td>
+    <td style="display:flex;gap:4px;flex-wrap:wrap">
+      <button class="btn btn-sm" onclick="showZakaatReceipt('${z.id}')">&#128424; Receipt</button>
+      ${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteZakaat('${z.id}')">Del</button>`:''}
+    </td>
+  </tr>`).join('');
+}
+
+async function addZakaat(){
+  if(!can('write')) return alert('You have read-only access');
+  const amount=document.getElementById('z-amount').value;
+  if(!amount) return alert('Enter amount');
+  const collectedBy=document.getElementById('z-collected').value.trim();
+  if(!collectedBy) return alert('Collected by is required');
+  try {
+    // Get unique ZA receipt number
+    let receiptNo='ZA-000001';
+    try {
+      const existing=await supaGet('zakaat','?select=receipt_no&order=receipt_no.desc&limit=1');
+      if(existing.length&&existing[0].receipt_no){
+        const match=String(existing[0].receipt_no).match(/([0-9]+)$/);
+        const next=match?parseInt(match[1])+1:1;
+        receiptNo='ZA-'+String(next).padStart(6,'0');
+      }
+    } catch(e){ console.error(e); }
+    const newZ={
+      id:String(Date.now()),
+      date:document.getElementById('z-date').value,
+      name:document.getElementById('z-name').value||'Anonymous',
+      amount,
+      payment_method:document.getElementById('z-method').value,
+      collected_by:collectedBy,
+      notes:document.getElementById('z-notes').value||'',
+      receipt_no:receiptNo
+    };
+    const result=await supaPost('zakaat',newZ);
+    db.zakaat.unshift(result[0]||newZ);
+    renderAll();
+    ['z-name','z-amount','z-collected','z-notes'].forEach(id=>document.getElementById(id).value='');
+  } catch(e){ alert('Error: '+e.message); console.error(e); }
+}
+
+async function deleteZakaat(id){
+  if(!can('write')) return;
+  if(!confirm('Delete this zakaat record?')) return;
+  try {
+    await supaDelete('zakaat','?id=eq.'+id);
+    db.zakaat=db.zakaat.filter(z=>String(z.id)!==String(id));
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); }
+}
+
+// ── Zakaat Expenses ───────────────────────────────────────────
+function renderZakaatExpenses(){
+  const tbody=document.getElementById('zakaat-exp-tbody');
+  if(!db.zakaat_expenses.length){tbody.innerHTML='<tr><td colspan="6" class="empty">No expenses recorded</td></tr>';return;}
+  tbody.innerHTML=db.zakaat_expenses.map(z=>`<tr>
+    <td>${formatDate(z.date)}</td>
+    <td>${z.description||'—'}</td>
+    <td class="neg">Rs ${Number(z.amount||0).toLocaleString()}</td>
+    <td>${z.paid_to||'—'}</td>
+    <td style="color:#888">${z.notes||''}</td>
+    <td>${can('write')?`<button class="btn btn-sm btn-danger" onclick="deleteZakaatExpense('${z.id}')">Del</button>`:''}</td>
+  </tr>`).join('');
+}
+
+async function addZakaatExpense(){
+  if(!can('write')) return alert('You have read-only access');
+  const desc=document.getElementById('ze-desc').value.trim();
+  if(!desc) return alert('Description is required');
+  const amount=document.getElementById('ze-amount').value;
+  if(!amount) return alert('Enter amount');
+  try {
+    const newExp={
+      id:String(Date.now()),
+      date:document.getElementById('ze-date').value,
+      description:desc,
+      amount,
+      paid_to:document.getElementById('ze-paidto').value||'',
+      notes:document.getElementById('ze-notes').value||''
+    };
+    const result=await supaPost('zakaat_expenses',newExp);
+    db.zakaat_expenses.unshift(result[0]||newExp);
+    renderAll();
+    ['ze-desc','ze-amount','ze-paidto','ze-notes'].forEach(id=>document.getElementById(id).value='');
+  } catch(e){ alert('Error: '+e.message); console.error(e); }
+}
+
+async function deleteZakaatExpense(id){
+  if(!can('write')) return;
+  if(!confirm('Delete this expense?')) return;
+  try {
+    await supaDelete('zakaat_expenses','?id=eq.'+id);
+    db.zakaat_expenses=db.zakaat_expenses.filter(z=>String(z.id)!==String(id));
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); }
+}
+
+// ── Zakaat Receipt ────────────────────────────────────────────
+function showZakaatReceipt(id){
+  const z=db.zakaat.find(x=>String(x.id)===String(id));
+  if(!z) return;
+  document.getElementById('zr-no').textContent=z.receipt_no||'—';
+  document.getElementById('zr-date').textContent=formatDate(z.date);
+  document.getElementById('zr-name').textContent=z.name||'Anonymous';
+  document.getElementById('zr-amount').textContent='Rs '+Number(z.amount||0).toLocaleString();
+  document.getElementById('zr-method').textContent=z.payment_method||'—';
+  document.getElementById('zr-collected').textContent=z.collected_by||'—';
+  document.getElementById('zr-notes').textContent=z.notes||'—';
+  document.getElementById('zakaat-receipt-modal').classList.add('active');
+}
+function closeZakaatReceipt(){ document.getElementById('zakaat-receipt-modal').classList.remove('active'); }
+function printZakaatReceipt(){ window.print(); }
+async function downloadZakaatReceipt(){
+  const box=document.getElementById('zakaat-receipt-content');
+  const rno=document.getElementById('zr-no').textContent||'receipt';
+  try {
+    const canvas=await html2canvas(box,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
+    const imgData=canvas.toDataURL('image/png');
+    const{jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a6'});
+    const pdfW=pdf.internal.pageSize.getWidth();
+    const pdfH=(canvas.height*pdfW)/canvas.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfW,pdfH);
+    pdf.save(rno+'.pdf');
+  } catch(e){ alert('Could not generate PDF. Please use Print instead.'); }
+}
+
+// ── Export CSV ─────────────────────────────────────────────────
+function exportCSV(){
+  let csv='MEMBERS\nName,Fee/yr,Paid To,Status,Entry Fee,Notes\n';
+  db.members.forEach(m=>{csv+=`"${m.name}",${m.fee||0},${formatMonth(m.paid_to)},${memberStatus(m)},${m.entry_fee||0},"${m.notes||''}"\n`;});
+  csv+='\nPAYMENTS\nDate,Member,Amount,Paid To,Fine,Notes\n';
+  db.payments.forEach(p=>{csv+=`${formatDate(p.date)},"${p.member_name}",${p.amount},${formatMonth(p.paid_to)},${p.fine||0},"${p.notes||''}"\n`;});
+  csv+='\nSAAMAN\nDate,Member,Items,Amount,Paid,Receipt\n';
+  db.saaman.forEach(s=>{csv+=`${formatDate(s.date)},"${s.member_name}","${s.items||''}",${s.amount},${s.paid},${s.receipt_no||''}\n`;});
+  csv+='\nMAJID BOX\nDate,Amount,Collected By,Notes\n';
+  db.box.forEach(b=>{csv+=`${formatDate(b.date)},${b.amount},"${b.collected_by||''}","${b.notes||''}"\n`;});
+  csv+='\nDONATIONS\nDate,Donor,Amount,Notes\n';
+  db.donations.forEach(d=>{csv+=`${formatDate(d.date)},"${d.donor}",${d.amount},"${d.notes||''}"\n`;});
+  csv+='\nZAKAAT\nDate,Name,Amount,Payment Method,Collected By,Notes\n';
+  db.zakaat.forEach(z=>{csv+=`${formatDate(z.date)},"${z.name||'Anonymous'}",${z.amount},"${z.payment_method||''}", "${z.collected_by||''}", "${z.notes||''}"\n`;});
+  csv+='\nZAKAAT EXPENSES\nDate,Description,Amount,Paid To,Notes\n';
+  db.zakaat_expenses.forEach(z=>{csv+=`${formatDate(z.date)},"${z.description||''}", ${z.amount},"${z.paid_to||''}", "${z.notes||''}"\n`;});
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='masjid_ledger.csv';a.click();
+}
+
+// ── Members Print/PDF ─────────────────────────────────────────
+function getMembersListHTML(){
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  const fs=document.getElementById('filter-status').value;
+  const sort=document.getElementById('members-sort')?document.getElementById('members-sort').value:'name';
+  const statusOrder={'ok':0,'warn':1,'late':2};
+  let list=db.members.filter(m=>{
+    if(q&&!String(m.name).toLowerCase().includes(q)) return false;
+    if(fs&&memberStatus(m)!==fs) return false;
+    return true;
+  });
+  if(sort==='name') list.sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  else if(sort==='name-desc') list.sort((a,b)=>String(b.name).localeCompare(String(a.name)));
+  else if(sort==='paidto') list.sort((a,b)=>String(a.paid_to||'').localeCompare(String(b.paid_to||'')));
+  else if(sort==='paidto-desc') list.sort((a,b)=>String(b.paid_to||'').localeCompare(String(a.paid_to||'')));
+  else if(sort==='status') list.sort((a,b)=>(statusOrder[memberStatus(a)]||0)-(statusOrder[memberStatus(b)]||0));
+  const filterLabel=fs?({'ok':'Members','warn':'Due soon','late':'Non members'}[fs]||''):'All members';
+  const sortLabel={'name':'Name A-Z','name-desc':'Name Z-A','paidto':'Paid to (oldest)','paidto-desc':'Paid to (newest)','status':'Status'}[sort]||'';
+  return `
+    <div style="font-family:Arial,sans-serif;padding:20px;max-width:900px;margin:0 auto;">
+      <div style="text-align:center;border-bottom:2px solid #1a1a1a;padding-bottom:12px;margin-bottom:16px;">
+        <h2 style="font-size:16px;font-weight:700;margin-bottom:4px;">Sunnee Muslim Mosque And Madrassa</h2>
+        <p style="font-size:13px;color:#666;">Members List — ${filterLabel} — Sorted by ${sortLabel}</p>
+        <p style="font-size:11px;color:#999;">Generated: ${formatDate(getLocalDate())} &nbsp;|&nbsp; Total: ${list.length} members</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#f5f5f5;">
+            <th style="padding:7px 8px;text-align:left;border-bottom:1px solid #ddd;">#</th>
+            <th style="padding:7px 8px;text-align:left;border-bottom:1px solid #ddd;">Name</th>
+            <th style="padding:7px 8px;text-align:left;border-bottom:1px solid #ddd;">Paid up to</th>
+            <th style="padding:7px 8px;text-align:left;border-bottom:1px solid #ddd;">Status</th>
+            <th style="padding:7px 8px;text-align:left;border-bottom:1px solid #ddd;">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map((m,i)=>{
+            const st=memberStatus(m);
+            const stColor=st==='ok'?'#155724':st==='warn'?'#856404':'#721c24';
+            const stBg=st==='ok'?'#d4edda':st==='warn'?'#fff3cd':'#f8d7da';
+            const stLabel=st==='ok'?'Member':st==='warn'?'Due soon':'Non member';
+            return `<tr style="border-bottom:0.5px solid #f0f0f0;">
+              <td style="padding:6px 8px;">${i+1}</td>
+              <td style="padding:6px 8px;font-weight:500;">${m.name}</td>
+              <td style="padding:6px 8px;">${formatMonth(m.paid_to)}</td>
+              <td style="padding:6px 8px;"><span style="background:${stBg};color:${stColor};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">${stLabel}</span></td>
+              <td style="padding:6px 8px;color:#888;">${m.notes||''}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+      <div style="text-align:center;font-size:10px;color:#999;margin-top:16px;">Sunnee Muslim Mosque And Madrassa</div>
+    </div>
+  `;
+}
+
+function printMembersList(){
+  const w=window.open('','_blank');
+  w.document.write('<html><head><title>Members List</title><style>@media print{body{margin:0;padding:0;}}</style></head><body>');
+  w.document.write(getMembersListHTML());
+  w.document.write('</body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{ w.print(); },500);
+}
+
+async function downloadMembersPDF(){
+  const btn=event.target;
+  btn.disabled=true; btn.textContent='Generating...';
+  try {
+    const container=document.createElement('div');
+    container.style.cssText='position:fixed;left:-9999px;top:0;width:900px;background:#fff;';
+    container.innerHTML=getMembersListHTML();
+    document.body.appendChild(container);
+    const canvas=await html2canvas(container,{scale:2,useCORS:true,backgroundColor:'#ffffff',windowWidth:900,scrollY:0,height:container.scrollHeight});
+    document.body.removeChild(container);
+    const imgData=canvas.toDataURL('image/png');
+    const{jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pdfW=pdf.internal.pageSize.getWidth();
+    const pdfH=pdf.internal.pageSize.getHeight();
+    const imgW=pdfW;
+    const imgH=(canvas.height*imgW)/canvas.width;
+    let heightLeft=imgH;
+    let position=0;
+    // First page
+    pdf.addImage(imgData,'PNG',0,position,imgW,imgH);
+    heightLeft-=pdfH;
+    // Add more pages if needed
+    while(heightLeft>0){
+      position=heightLeft-imgH;
+      pdf.addPage();
+      pdf.addImage(imgData,'PNG',0,position,imgW,imgH);
+      heightLeft-=pdfH;
+    }
+    const fs=document.getElementById('filter-status').value;
+    const label=fs?({'ok':'members','warn':'due-soon','late':'non-members'}[fs]||'members'):'all-members';
+    pdf.save('members-'+label+'-'+getLocalDate()+'.pdf');
+  } catch(e){ alert('Could not generate PDF. Please use Print instead.'); console.error(e); }
+  btn.disabled=false; btn.textContent='⬇ PDF';
+}
+
+// ── Member Edit ───────────────────────────────────────────────
+function editMember(id){
+  const m=db.members.find(x=>String(x.id)===String(id));
+  if(!m) return;
+  document.getElementById('edit-member-id').value=id;
+  document.getElementById('edit-member-name').value=m.name||'';
+  document.getElementById('edit-member-fee').value=m.fee||'';
+  document.getElementById('edit-member-date').value=m.join_date?String(m.join_date).split('T')[0]:'';
+  document.getElementById('edit-member-paidto').value=m.paid_to?String(m.paid_to).substring(0,7):'';
+  document.getElementById('edit-member-entry').value=m.entry_fee||'';
+  document.getElementById('edit-member-notes').value=m.notes||'';
+  document.getElementById('member-edit-modal').classList.add('active');
+}
+
+function closeMemberEdit(){
+  document.getElementById('member-edit-modal').classList.remove('active');
+}
+
+async function saveMemberEdit(){
+  const id=document.getElementById('edit-member-id').value;
+  const name=document.getElementById('edit-member-name').value.trim();
+  if(!name) return alert('Name is required');
+  const paidTo=document.getElementById('edit-member-paidto').value;
+  if(!paidTo) return alert('Paid up to is required');
+  const updates={
+    name,
+    fee: document.getElementById('edit-member-fee').value||'0',
+    join_date: document.getElementById('edit-member-date').value||null,
+    paid_to: paidTo,
+    entry_fee: document.getElementById('edit-member-entry').value||'0',
+    notes: document.getElementById('edit-member-notes').value||''
+  };
+  try {
+    await supaPatch('members', updates, '?id=eq.'+id);
+    const m=db.members.find(x=>String(x.id)===String(id));
+    if(m) Object.assign(m, updates);
+    closeMemberEdit();
+    renderAll();
+  } catch(e){ alert('Error: '+e.message); console.error(e); }
+}
+
+// ── Render all ─────────────────────────────────────────────────
 function renderAll(){
   renderStats(); renderMembers(); populateMemberSelects();
-  renderPayments(); renderSaaman(); renderBox(); renderDonations(); renderUsers();
-  renderSaamanItems();
+  renderPayments(); renderSaaman(); renderBox(); renderDonations();
+  renderZakaat(); renderZakaatExpenses(); renderUsers(); renderSaamanItems();
 }
 
 function switchTab(name,el){
-  ['members','payments','saaman','box','donations','reports','users'].forEach(t=>{
+  ['members','payments','saaman','box','donations','zakaat','reports','users'].forEach(t=>{
     const el2=document.getElementById('tab-'+t);
     if(el2) el2.style.display=t===name?'block':'none';
   });
@@ -1326,23 +1743,10 @@ function switchTab(name,el){
   if(el) el.classList.add('active');
 }
 
-function exportCSV(){
-  let csv='MEMBERS\nName,Fee/yr,Paid To,Status,Entry Fee,Notes\n';
-  db.members.forEach(m=>{csv+=`"${m.name}",${m.fee},${m.paidTo||''},${memberStatus(m)},${m.entryFee||0},"${m.notes||''}"\n`;});
-  csv+='\nPAYMENTS\nDate,Member,Amount,Paid To,Fine,Notes\n';
-  db.payments.forEach(p=>{const m=db.members.find(x=>String(x.id)===String(p.memberId));csv+=`${p.date},"${m?m.name:p.memberName}",${p.amount},${p.paidTo||''},${p.fine||0},"${p.notes||''}"\n`;});
-  csv+='\nSAAMAN\nDate,Member,Items,Amount,Paid,Notes\n';
-  db.saaman.forEach(s=>{const m=db.members.find(x=>String(x.id)===String(s.memberId));csv+=`${s.date},"${m?m.name:s.memberName}","${s.items||''}",${s.amount},${s.paid},"${s.notes||''}"\n`;});
-  csv+='\nMAJID BOX\nDate,Amount,Collected By,Notes\n';
-  db.box.forEach(b=>{csv+=`${b.date},${b.amount},"${b.by||''}","${b.notes||''}"\n`;});
-  csv+='\nDONATIONS\nDate,Donor,Amount,Notes\n';
-  db.donations.forEach(d=>{csv+=`${d.date},"${d.donor}",${d.amount},"${d.notes||''}"\n`;});
-  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='masjid_ledger.csv';a.click();
-}
-
-// ── INIT ──────────────────────────────────────────────────────
-const saved = sessionLoad();
+// ── Init ───────────────────────────────────────────────────────
+const saved=sessionLoad();
 if(saved){ currentUser=saved; showApp(); }
 </script>
 </body>
 </html>
+
